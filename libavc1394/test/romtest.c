@@ -21,7 +21,8 @@
 
 #include <config.h>
 
-#include <librom1394/rom1394.h>
+#include "../librom1394/rom1394.h"
+
 #include <libraw1394/raw1394.h>
 #include <stdio.h>
 #include <stdlib.h>
