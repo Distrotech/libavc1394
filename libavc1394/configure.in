@@ -1,6 +1,6 @@
 AC_INIT(Makefile.am)
 
-AM_INIT_AUTOMAKE(libavc1394, 0.1.1)
+AM_INIT_AUTOMAKE(libavc1394, 0.2)
 AM_CONFIG_HEADER(config.h)
 
 AC_PROG_CC
@@ -33,5 +33,5 @@ LTLIBOBJS=`echo X"$LIBOBJS"|\
            [$Xsed -e "s,\.[^.]* ,.lo ,g;s,\.[^.]*$,.lo,"]`
 AC_SUBST(LTLIBOBJS)
 
-AC_OUTPUT(Makefile libavc1394/Makefile test/Makefile)
+AC_OUTPUT(Makefile common/Makefile libavc1394/Makefile librom1394/Makefile test/Makefile)
 

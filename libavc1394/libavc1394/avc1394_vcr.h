@@ -1,5 +1,5 @@
 /*
- * libavc1394 - GNU/Linux 1394 AV/C Library
+ * libavc1394 - GNU/Linux IEEE 1394 AV/C Library
  *
  * Originally written by Andreas Micklei <andreas.micklei@ivistar.de>
  * Currently maintained by Dan Dennedy <dan@dennedy.org>

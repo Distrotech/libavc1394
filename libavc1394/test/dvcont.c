@@ -68,7 +68,6 @@ printf("\n\n");
 
 
 int main (int argc, char *argv[])
-
 {
 	raw1394handle_t handle;
 	quadlet_t quadlet;	

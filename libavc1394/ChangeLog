@@ -1,7 +1,9 @@
-2001-05-10  Dan Dennedy  <dan@dennedy.org>
-	* converted Andreas Mickleis' simplavc into a library
-	* converted Jason Howard's dvcont to use libavc1394 vcr interface
-
+2001-05-27  Dan Dennedy <dan@dennedy.org>
+    * added librom1394
+    * added test program, romtest, for testing librom1394
+    * moved raw1394util into a common directory because it use by
+      both libraries
+    
 2001-05-11  Dan Dennedy
     * various build fixes requires moving src/ to libavc1394/
     * adapt raw1394util.c to new v0.9 libraw1394 API, 
@@ -10,3 +12,8 @@
       avc1394_check_subunit_type()
     * make dvcont determine first numerically sequential node
       that is VCR subunit and use it if no dev specified.
+
+2001-05-10  Dan Dennedy  <dan@dennedy.org>
+	* converted Andreas Mickleis' simplavc into a library
+	* converted Jason Howard's dvcont to use libavc1394 vcr interface
+
