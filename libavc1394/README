@@ -12,11 +12,6 @@ can be controlled via AV/C. Eventually, the library will be expanded to
 implement more of the specification and to provide high level interfaces
 to various devices.
 
-	libavc1394 also includes librom1394 and libplug1394. Basically, 
-the libavc1394 project is turning into a collection of libraries 
-that use raw1394 to implement standards for metadata, management, and
-control.
-
 	librom1394 provides the ability to read the Configuration ROM
 on devices. It also permits the manipulation of ConfigROM images
 for the Linux 1394 host when used in conjunction with new libraw1394
@@ -27,13 +22,6 @@ to update the rom directories by changing the root directory, updating
 the existing textual leaves of the root, and adding unit directories
 with simple ASCII textual leaves. It is not yet possible to remove unit
 directories or handle fancy stuff like icon decriptors.
-
-	libplug1394 implements functions to read and change plug 
-control registers as well as giving you the ability to host plugs. It
-is based upon IEC 61883-1. It is used to manage isochronous interconnections
-between nodes and across the bus in general. It does not implement the 
-high level connection management procedures.
-
 
 2. Usage Information
 
@@ -50,7 +38,6 @@ the source archives not belonging to but being part of the build procedure of
 libavc1394 are under their own licenses, as stated at the top of the individual
 files.
 
-
 4. API documentation
 
 	There is currently no external document describing the library
@@ -58,10 +45,9 @@ functions, but you can find documentation for all functions in the header file
 avc1394.h or avc1394_vcr.h.  avc1394_vcr.h is a very high level interface
 specific to the VCR AV/C subunit.  It implements the most common functions
 that an application needs to control the tape transport meachnism on a DV
-camcorder.  Both avc1394_vcr.c and test/dvcont.c are the best examples of how
-to use the libavc1394 interfaces. There are also examples in the test 
-directory for librom1394 and libplug1394.
-
+camcorder.  Both test/avc1394_vcr.c and test/dvcont.c are the best examples of
+how to use the libavc1394 interfaces. There are also examples in the test 
+directory for librom1394.
 
 5. Maintainer
 	Maintainer of libavc1394 is currently Dan Dennedy.  Send suggestions,
@@ -71,7 +57,4 @@ for a complete list of contributors to libavc1394.
 	You can get updates through this project's homepage on SourceForge, see
 http://sourceforge.net/projects/libavc1394 for more information.  You can
 also submit bugs through this page.
-
-
-2001-08-15  Dan Dennedy
 
