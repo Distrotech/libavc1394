@@ -1,3 +1,6 @@
+2005-02-17  Dan Dennedy <dan@dennedy.org>
+	* added spec and pkg-config support files
+
 2005-01-25  Dan Dennedy <dan@dennedy.org>
 	* convert build to use pkg-config for libraw1394
 	* common/raw1394util.c: remove support for libraw1394 0.8

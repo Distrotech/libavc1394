@@ -30,4 +30,6 @@ common/Makefile
 libavc1394/Makefile 
 librom1394/Makefile 
 test/Makefile
+libavc1394.spec
+libavc1394.pc
 ])
