@@ -1,3 +1,7 @@
+2003-11-24  Dan Dennedy <dan@dennedy.org>
+    * libavc1934/avc1394_vcr.c: patch from Phiipp Marek to report Recording
+      vs Recording Paused.
+
 2003-04-23  Dan Dennedy <dan@dennedy.org>
     * libplug1394: updated for changes in libraw1394 ARM
     * librom1394: added error handling around the processing of sub directories.

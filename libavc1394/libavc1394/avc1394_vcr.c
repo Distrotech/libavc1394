@@ -238,7 +238,10 @@ char *avc1394_vcr_decode_status(quadlet_t response)
     } else if (resp2 == AVC1394_VCR_RESPONSE_TRANSPORT_STATE_LOAD_MEDIUM) {
         return("Loading Medium");
     } else if (resp2 == AVC1394_VCR_RESPONSE_TRANSPORT_STATE_RECORD) {
-        return("Recording");
+        if (resp3 == AVC1394_VCR_OPERAND_RECORD_PAUSE)
+            return("Recording Paused");
+        else
+            return("Recording");
     } else if (resp2 == AVC1394_VCR_RESPONSE_TRANSPORT_STATE_PLAY) {
         if (resp3 >= AVC1394_VCR_OPERAND_PLAY_FAST_FORWARD_1
                 && resp3 <= AVC1394_VCR_OPERAND_PLAY_FASTEST_FORWARD) {
