@@ -53,8 +53,7 @@ int avc1394_send_command(raw1394handle_t handle, nodeid_t node, quadlet_t comman
 {
     quadlet_t cmd = htonl(command);
 
-    return cooked1394_write(handle, 0xffc0 | node, FCP_COMMAND_ADDR,
-                            4, &cmd);
+    return cooked1394_write(handle, 0xffc0 | node, FCP_COMMAND_ADDR, 4, &cmd);
 }
 
 int avc1394_send_command_block(raw1394handle_t handle, nodeid_t node,
@@ -78,8 +77,7 @@ int avc1394_send_command_block(raw1394handle_t handle, nodeid_t node,
  * 		error
  */
 quadlet_t avc1394_transaction(raw1394handle_t handle, nodeid_t node,
-                          quadlet_t quadlet, int retry
-                         )
+                          quadlet_t quadlet, int retry)
 {
 
     quadlet_t response;
@@ -89,7 +87,7 @@ quadlet_t avc1394_transaction(raw1394handle_t handle, nodeid_t node,
     do {
         if (avc1394_send_command(handle, node, quadlet) < 0) {
             fprintf(stderr,"send oops\n");
-            usleep(10);
+            usleep(AVC1394_SLEEP);
             continue;
         }
 
@@ -101,10 +99,13 @@ quadlet_t avc1394_transaction(raw1394handle_t handle, nodeid_t node,
             response = ntohl(*((quadlet_t *)g_fcp_response));
         }
         stop_avc_response_handler(handle);
-        /*fprintf(stderr, "avc1394_transaction: Got AVC response 0x%0x (%s)\n", response, decode_response(response));*/
+
+#ifdef DEBUG      
+        fprintf(stderr, "avc1394_transaction: Got AVC response 0x%0x (%s)\n", response, decode_response(response));
+#endif
+
         return response;
-    } while (--retry
-             >= 0);
+    } while (--retry >= 0);
 
     stop_avc_response_handler(handle);
 
@@ -123,19 +124,17 @@ quadlet_t avc1394_transaction(raw1394handle_t handle, nodeid_t node,
  * 		error. The response always has the same length as the request.
  */
 quadlet_t *avc1394_transaction_block(raw1394handle_t handle, nodeid_t node,
-                                 quadlet_t *buf, int len, int retry
-                                )
+                                 quadlet_t *buf, int len, int retry)
 {
 
     quadlet_t *response;
-    /*int i;*/
 
     init_avc_response_handler(handle);
 
     do {
         if (avc1394_send_command_block(handle, node, buf, len) < 0) {
             fprintf(stderr,"send oops\n");
-            usleep(10);
+            usleep(AVC1394_SLEEP);
             continue;
         }
 
@@ -148,12 +147,18 @@ quadlet_t *avc1394_transaction_block(raw1394handle_t handle, nodeid_t node,
         }
         stop_avc_response_handler(handle);
         ntohl_block(response, len);
-        /*fprintf(stderr, "avc1394_transaction_block received response: ");
+
+#ifdef DEBUG
+        {
+        int i;
+        fprintf(stderr, "avc1394_transaction_block received response: ");
         for (i=0; i<len; i++) fprintf(stderr, " 0x%08X", response[i]);
-        fprintf(stderr, " (%s)\n", decode_response(response[0]));*/
+        fprintf(stderr, " (%s)\n", decode_response(response[0]));
+        }
+#endif
+
         return response;
-    } while (--retry
-             >= 0);
+    } while (--retry >= 0);
     stop_avc_response_handler(handle);
     return NULL;
 }
@@ -175,15 +180,20 @@ int avc1394_open_descriptor(raw1394handle_t handle, nodeid_t node,
     //quadlet_t request[2];
     quadlet_t request[2];
     quadlet_t *response;
-    int i;
     unsigned char subfunction = readwrite?
                                 AVC1394_OPERAND_DESCRIPTOR_SUBFUNCTION_WRITE_OPEN
                                 :AVC1394_OPERAND_DESCRIPTOR_SUBFUNCTION_READ_OPEN;
 
+#ifdef DEBUG
+    {
+    int i;
     fprintf(stderr, "Open descriptor: ctype: 0x%08X, subunit:0x%08X,\n     descriptor_identifier:", ctype, subunit);
     for (i=0; i<len_descriptor_identifier; i++)
         fprintf(stderr, " 0x%02X", descriptor_identifier[i]);
     fprintf(stderr,"\n");
+    }
+#endif
+
     if (len_descriptor_identifier != 1)
         fprintf(stderr, "Unimplemented.\n");
     /*request[0] = ctype | subunit | AVC1394_COMMAND_OPEN_DESCRIPTOR
@@ -200,7 +210,10 @@ int avc1394_open_descriptor(raw1394handle_t handle, nodeid_t node,
     if (response == NULL)
         return -1;
 
+#ifdef DEBUG
     fprintf(stderr, "Open descriptor response: 0x%08X.\n", *response);
+#endif
+
     return 0;
 }
 
@@ -214,13 +227,17 @@ int avc1394_close_descriptor(raw1394handle_t handle, nodeid_t node,
 
     quadlet_t request[2];
     quadlet_t *response;
-    int i;
     unsigned char subfunction = AVC1394_OPERAND_DESCRIPTOR_SUBFUNCTION_CLOSE;
 
+#ifdef DEBUG
+    {
+    int i;
     fprintf(stderr, "Close descriptor: ctype: 0x%08X, subunit:0x%08X,\n      descriptor_identifier:", ctype, subunit);
     for (i=0; i<len_descriptor_identifier; i++)
         fprintf(stderr, " 0x%02X", descriptor_identifier[i]);
     fprintf(stderr,"\n");
+    }
+#endif
     if (len_descriptor_identifier != 1)
         fprintf(stderr, "Unimplemented.\n");
     /*request[0] = ctype | subunit | AVC1394_COMMAND_OPEN_DESCRIPTOR
@@ -235,7 +252,10 @@ int avc1394_close_descriptor(raw1394handle_t handle, nodeid_t node,
     if (response == NULL)
         return -1;
 
+#ifdef DEBUG
     fprintf(stderr, "Close descriptor response: 0x%08X.\n", *response);
+#endif
+
     return 0;
 }
 
@@ -288,9 +308,13 @@ int avc1394_subunit_info(raw1394handle_t handle, nodeid_t node, quadlet_t *table
         table[page] = response[1];
     }
 
-    /*fprintf(stderr, "avc_subunit_info:");
+#ifdef DEBUG
+    {
+    fprintf(stderr, "avc_subunit_info:");
     for (page=0; page < 8; page++) fprintf(stderr, " 0x%08X", table[page]);
-    fprintf(stderr, "\n");*/
+    fprintf(stderr, "\n");
+    }
+#endif
 
     return 0;
 }
@@ -329,9 +353,10 @@ quadlet_t *avc1394_unit_info(raw1394handle_t handle, nodeid_t node)
     if (response == NULL)
         return NULL;
 
+#ifdef DEBUG
     fprintf(stderr, "avc_unit_info: 0x%08X 0x%08X\n",
             response[0], response[1]);
-
+#endif
     return response;
 }
 

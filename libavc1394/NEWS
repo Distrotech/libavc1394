@@ -1,3 +1,7 @@
+Version 0.4:
+- bugfix dvcont hanging
+Version 0.3:
+- added more avc1394_vcr_* commands
 Version 0.2:
 - second release with librom1394
 Version 0.1:

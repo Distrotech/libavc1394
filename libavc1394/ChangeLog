@@ -1,3 +1,17 @@
+2002-04-04  Dan Dennedy <dan@dennedy.org>
+    * Applied patch from Kirk Bateman to handle unicode US_ENGLISH
+      (Microsoft specific?) textual leaves in librom1394. Thanks!
+
+2001-09-22  Dan Dennedy <dan@dennedy.org>
+    * test/Makefile.am: tidy up
+    * libavc1394/avc1394_internal.h: added defines for DEBUG and AVC1394_SLEEP
+    * libavc1394/avc1394_simple.c: slight cleanup and conditional debug
+    * test/dvcont.c: fixed bug that required Bevis King's timeout signal
+      by using rom1394 to check for an AVC node before asking the node
+      for AV/C subunit info -- doh!
+    * test/dvcont.c: cleanup error messages and explicitly close raw1394
+      handle
+
 2001-08-15  Dan Dennedy <dan@dennedy.org>
     * avc1394_simple.c: bug fix in avc1394_check_subunit_type() to handle
       error return from call to avc1394_subunit_info(), set retry level =2

@@ -44,6 +44,8 @@ int read_textual_leaf(raw1394handle_t handle, nodeid_t node, octlet_t offset,
 	int i, length;
 	char *s;
 	quadlet_t quadlet;
+	quadlet_t language_spec;	// language specifier
+	quadlet_t charset_spec;		// character set specifier
 
 	DEBUG(node, "reading textual leaf: 0x%08x%08x\n", (unsigned int) (offset>>32), 
 	    (unsigned int) offset&0xFFFFFFFF);
@@ -59,16 +61,22 @@ int read_textual_leaf(raw1394handle_t handle, nodeid_t node, octlet_t offset,
 	}
 
 	QUADINC(offset);
-	QUADREADERR(handle, node, offset, &quadlet);
-	quadlet = htonl(quadlet);
+	QUADREADERR(handle, node, offset, &language_spec);
+	language_spec = htonl(language_spec);
 	/* assert language specifier=0 */
-	if (quadlet != 0) WARN(node, "unimplemented language for textual leaf", offset);
+	if (language_spec != 0) {
+		if (!(language_spec & 0x80000000)) 
+			WARN(node, "unimplemented language for textual leaf", offset);
+	}
 
 	QUADINC(offset);
-	QUADREADERR(handle, node, offset, &quadlet);
-	quadlet = htonl(quadlet);
+	QUADREADERR(handle, node, offset, &charset_spec);
+	charset_spec = htonl(charset_spec);
 	/* assert character set =0 */
-	if (quadlet != 0) WARN(node, "unimplemented character set for textual leaf", offset);
+	if (charset_spec != 0) {
+		if (charset_spec != 0x409) 					// US_ENGLISH (unicode) Microsoft format leaf
+			WARN(node, "unimplemented character set for textual leaf", offset);
+	}
 
 	if ((s = (char *) malloc(length+1)) == NULL)
 		FAIL( node, "out of memory");
@@ -92,13 +100,21 @@ int read_textual_leaf(raw1394handle_t handle, nodeid_t node, octlet_t offset,
 		QUADINC(offset);
 		QUADREADERR(handle, node, offset, &quadlet);
 		quadlet = htonl(quadlet);
-		s[i] = quadlet>>24;
-		if (++i < length) s[i] = (quadlet>>16)&0xFF;
-		else break;
-		if (++i < length) s[i] = (quadlet>>8)&0xFF;
-		else break;
-		if (++i < length) s[i] = (quadlet)&0xFF;
-		else break;
+		if (charset_spec == 0) {
+			s[i] = quadlet>>24;
+			if (++i < length) s[i] = (quadlet>>16)&0xFF;
+			else break;
+			if (++i < length) s[i] = (quadlet>>8)&0xFF;
+			else break;
+			if (++i < length) s[i] = (quadlet)&0xFF;
+			else break;
+		} else {
+			if (charset_spec == 0x409) {
+				s[i] = (quadlet>>24) & 0xFF;
+				if (++i < length) s[i] = (quadlet>>8) & 0xFF;
+				else break;
+			}
+		}
 	}
 	s[i] = '\0';
     DEBUG( node, "textual leaf is: (%s)\n", s);

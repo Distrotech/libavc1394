@@ -7,6 +7,8 @@
 
 #define MAX_RESPONSE_SIZE 512
 #define AVC1394_RETRY 2
+#define AVC1394_SLEEP 10
+/* #define DEBUG */
 
 void htonl_block(quadlet_t *buf, int len);
 void ntohl_block(quadlet_t *buf, int len);

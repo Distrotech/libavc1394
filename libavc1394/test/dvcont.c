@@ -2,9 +2,8 @@
  * By: Jason Howard <jason@spectsoft.com>
  * http://www.spectsoft.com
  * Code Started January 1, 2001.
- * Version 0.1
+ * Version 0.2
  * Adapted to libavc1394 by Dan Dennedy <dan@dennedy.org>
- * Timeout handling added by Bevis King
  * Many commands since 0.04 added by Dan Dennedy
  *
  * This code is based off a GNU project called gscanbus by Andreas Micklei
@@ -30,6 +29,7 @@
 
 // Load up the needed includes.
 #include <config.h>
+#include <librom1394/rom1394.h>
 #include <libavc1394/avc1394.h>
 #include <libavc1394/avc1394_vcr.h>
 #include <libraw1394/raw1394.h>
@@ -37,18 +37,9 @@
 #include <sys/types.h>
 #include <stdio.h>
 #include <errno.h>
-#include <unistd.h>
 #include <stdlib.h>
-#include <signal.h>
 
-#define TYPEREQ_TIMEOUT	5
-extern void timeout_happened();
-int timeout=0;
-
-int i;
-
-#define version "Version 0.1"
-
+#define version "Version 0.2"
 
 void show_help() {
 
@@ -79,80 +70,67 @@ printf("\n\n");
 
 }
 
-
 int main (int argc, char *argv[])
 {
+	rom1394_directory rom_dir;
 	raw1394handle_t handle;
-	quadlet_t quadlet;	
-	int device;
-	int retcode;
-	int verbose;
+	int device = -1;
+	int verbose = 0;
+    int i;
 	int speed;
-	struct sigaction act;
 	char *timecode;
 
 	// Declare some default values.
 	
-	device = 1;
-	verbose = 0;
 #ifdef RAW1394_V_0_8
 	handle = raw1394_get_handle();
 #else
     handle = raw1394_new_handle();
 #endif
-        if (!handle) {
-                if (!errno) {
-                        printf("Not Compatable!\n");
-                } else {
-                        printf("\ncouldn't get handle\n");
-                        printf("Not Loaded!\n");
-                }
-                exit(1);
-        } 
-
+    if (!handle)
+    {
+        if (!errno)
+        {
+            fprintf(stderr, "Not Compatable!\n");
+        } else {
+            perror("Couldn't get 1394 handle");
+            fprintf(stderr, "Is ieee1394, driver, and raw1394 loaded?\n");
+        }
+        exit(1);
+    } 
 
 	if (raw1394_set_port(handle, 0) < 0) {
 		perror("couldn't set port");
+        raw1394_destroy_handle(handle);
 		exit(1);
 	}
 
 		
-	if (raw1394_read(handle, 0xffc0 | raw1394_get_local_id(handle),
-		CSR_REGISTER_BASE + CSR_CYCLE_TIME, 4,
-		(quadlet_t *) &quadlet) < 0) {
-		fprintf(stderr,"something is wrong here\n");
-	}
+   	for (i=0; i < raw1394_get_nodecount(handle); ++i)
+    {
+    	if (rom1394_get_directory(handle, i, &rom_dir) < 0)
+    	{
+    	    fprintf(stderr,"error reading config rom directory for node %d\n", i);
+            raw1394_destroy_handle(handle);
+    	    exit(1);
+        }
 
-#ifdef SA_RESTART
-	act.sa_handler = timeout_happened;
-	sigemptyset(&(act.sa_mask));
-	act.sa_flags = 0;
-	sigaction( SIGALRM, &act, NULL );
-#else
-	fprintf( stderr, 
-		"can't stop system call from restarting - warnings only\n");
-	signal( SIGALRM, timeout_happened );
-#endif
+        if ( (rom1394_get_node_type(&rom_dir) == ROM1394_NODE_TYPE_AVC) &&
+            avc1394_check_subunit_type(handle, i, AVC1394_SUBUNIT_TYPE_VCR))
+        {
+            device = i;
+            break;
+        }
+    }
+    
+    if (device == -1)
+    {
+        fprintf(stderr, "Could not find any AV/C devices on the 1394 bus.\n");
+        raw1394_destroy_handle(handle);
+        exit(1);
+    }
 
-    	for (i=0; i < raw1394_get_nodecount(handle); ++i)
-	{
-		timeout=0;
-		alarm( TYPEREQ_TIMEOUT );
-
-		retcode= avc1394_check_subunit_type(handle, i,
-						AVC1394_SUBUNIT_TYPE_VCR);
-		if( timeout >= 1 )
-			retcode = 0;  /* assume things failed */
-		if( retcode == 1 )
-		{
-		    device = i;
-		    break;
-		}
-		alarm( 0 );
-	}
-	signal( SIGALRM, SIG_DFL );
-
-	for (i = 1; i < argc; ++i) {
+    for (i = 1; i < argc; ++i) {
         
         if (strcmp("play", argv[i]) == 0) {
             avc1394_vcr_play(handle, device);
@@ -170,22 +148,22 @@ int main (int argc, char *argv[])
             avc1394_vcr_stop(handle, device);
 	    
 	    } else if (strcmp("rewind", argv[i]) == 0) {
-		avc1394_vcr_rewind(handle, device);
+    		avc1394_vcr_rewind(handle, device);
 	    
 	    } else if (strcmp("ff", argv[i]) == 0) {
-		avc1394_vcr_forward(handle, device);
+    		avc1394_vcr_forward(handle, device);
 	    
 	    } else if (strcmp("pause", argv[i]) == 0) {
-		avc1394_vcr_pause(handle, device);
+		    avc1394_vcr_pause(handle, device);
 	    
 	    } else if (strcmp("record", argv[i]) == 0) {
-		avc1394_vcr_record(handle, device);
+    		avc1394_vcr_record(handle, device);
 	    
 	    } else if (strcmp("eject", argv[i]) == 0) {
-		avc1394_vcr_eject(handle, device);
+    		avc1394_vcr_eject(handle, device);
 	    
 	    } else if (strcmp("status", argv[i]) == 0) {
-		printf( "%s\n", avc1394_vcr_decode_status(avc1394_vcr_status(handle, device)));
+    		printf( "%s\n", avc1394_vcr_decode_status(avc1394_vcr_status(handle, device)));
 	    
 	    } else if (strcmp("timecode", argv[i]) == 0) {
 	        if ( (timecode = avc1394_vcr_get_timecode(handle, device)) != NULL) {
@@ -223,23 +201,13 @@ int main (int argc, char *argv[])
 		
 		device = atoi(argv[(i+1)]);
 		
-		if (verbose == 1) {
-			printf("\nUsing Device: %d\n", device);
-		}
-
-	    }
-	
+    		if (verbose == 1) {
+    			printf("\nUsing Device: %d\n", device);
+    		}
+        }	
 	}
 		
+    raw1394_destroy_handle(handle);
 	return 0;
 }
 
-void timeout_happened()
-{
-	fprintf( stderr, "request to node %d about it's type timed out\n",
-			i );
-	timeout++;
-
-	alarm( 5 );
-	return;
-}

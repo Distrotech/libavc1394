@@ -13,6 +13,7 @@ implement more of the specification and to provide high level interfaces
 to various devices.
 
 2. Usage Information
+
     The library comes with a console utility called dvcont that lets you
 send commands to the tape mechanism on your DV camcorder with IEEE-1394.
 There is a man page for it, so after installation 'man dvcont' for more
