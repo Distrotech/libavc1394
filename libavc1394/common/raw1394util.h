@@ -13,8 +13,8 @@ extern "C"
 
 /* maximum number of retry attempts on raw1394 async transactions */
 #define MAXTRIES 20
-/* amount of delay in microseconds to wait before retrying raw1394 async transaction */
-#define RETRY_DELAY 20
+/* amount of delay in nanoseconds to wait before retrying raw1394 async transaction */
+#define RETRY_DELAY 20000
 
 /* Mask and shift macros */
 #define RAW1394_MASK_ACK(x) ((x) >> 16)

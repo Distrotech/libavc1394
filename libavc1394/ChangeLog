@@ -1,3 +1,6 @@
+2002-10-01  Dan Dennedy <dan@dennedy.org?
+	* common/raw1394util.c: convert from usleep to nanosleep
+	
 2002-09-26  Dan Dennedy <dan@dennedy.org>
 	* avc1394_simple.c: remove test for STABLE response from avc transactions.
 	* avc1394_simple.c: convert usleep to nanosleep.
