@@ -110,6 +110,7 @@ int rom1394_get_directory(raw1394handle_t handle, nodeid_t node, rom1394_directo
 	octlet_t 	offset;
 	int i, j;
 	char *p;
+	int result = 0;
 
 	NODECHECK(handle, node);
     dir->node_capabilities = 0;
@@ -122,23 +123,24 @@ int rom1394_get_directory(raw1394handle_t handle, nodeid_t node, rom1394_directo
 	dir->textual_leafs = NULL;
 
 	offset = CSR_REGISTER_BASE + CSR_CONFIG_ROM + ROM1394_ROOT_DIRECTORY;
-	proc_directory (handle, node, offset, dir);
-
-	 /* Calculate label */
-    if (dir->nr_textual_leafs != 0 && dir->textual_leafs[0]) {
-        for (i = 0, j = 0; i < dir->nr_textual_leafs; i++)
-            if (dir->textual_leafs[i]) j += (strlen(dir->textual_leafs[i]) + 1);
-    	if ( (dir->label = (char *) malloc(j)) ) {
-    	    for (i = 0, p = dir->label; i < dir->nr_textual_leafs; i++, p++) {
-    	        if (dir->textual_leafs[i]) {
-    		        strcpy ( p, dir->textual_leafs[i]);
-		            p += strlen(dir->textual_leafs[i]);
-			        if (i < dir->nr_textual_leafs-1) p[0] = ' ';
-		        }
-		    }
+	if ( ( result = proc_directory (handle, node, offset, dir) ) != -1 )
+	{
+		 /* Calculate label */
+		if (dir->nr_textual_leafs != 0 && dir->textual_leafs[0]) {
+			for (i = 0, j = 0; i < dir->nr_textual_leafs; i++)
+				if (dir->textual_leafs[i]) j += (strlen(dir->textual_leafs[i]) + 1);
+			if ( (dir->label = (char *) malloc(j)) ) {
+				for (i = 0, p = dir->label; i < dir->nr_textual_leafs; i++, p++) {
+					if (dir->textual_leafs[i]) {
+						strcpy ( p, dir->textual_leafs[i]);
+						p += strlen(dir->textual_leafs[i]);
+						if (i < dir->nr_textual_leafs-1) p[0] = ' ';
+					}
+				}
+			}
 		}
 	}
-	return 0;
+	return result;
 }
 
 /* ----------------------------------------------------------------------------
@@ -272,11 +274,13 @@ int rom1394_add_unit(quadlet_t *buffer, rom1394_directory *dir)
 	*p++ = htonl(value);
 	value = (0x17 << 24) | (dir->model_id & 0x00FFFFFF);
 	*p++ = htonl(value);
-	if (dir->nr_textual_leafs > 0)
+    
+    /* TODO: process multiple leafs */
+	for (i = 0; i < 1 /* dir->nr_textual_leafs */; i++)
 	{
 		value = (0x81 << 24) | (((buffer+len)-p) & 0x00FFFFFF);
 		*p++ = htonl(value);
-			len += add_textual_leaf( buffer + len, dir->textual_leafs[0]);
+		len += add_textual_leaf( buffer + len, dir->textual_leafs[i]);
 	}
 	
 	/* compute CRC for unit directory */

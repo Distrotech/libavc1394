@@ -118,8 +118,7 @@ int main (int argc, char *argv[])
     	if (rom1394_get_directory(handle, i, &rom_dir) < 0)
     	{
     	    fprintf(stderr,"error reading config rom directory for node %d\n", i);
-            raw1394_destroy_handle(handle);
-    	    exit(1);
+    	    continue;
         }
 
 		for (j = 1; j < argc; ++j) {

@@ -126,7 +126,7 @@ static struct input_registers {
  * \return        0 for success, -1 on error.
  */
 static int
-do_arm_read(raw1394handle_t handle, struct arm_request *arm_req, 
+do_arm_read(raw1394handle_t handle, struct raw1394_arm_request *arm_req, 
 		nodeaddr_t a, quadlet_t *data)
 {
 	quadlet_t *response;
@@ -177,10 +177,10 @@ do_arm_read(raw1394handle_t handle, struct arm_request *arm_req,
  * \return        0 for success, -1 on error.
  */
 static int
-do_arm_lock(raw1394handle_t handle, struct arm_request *arm_req,
+do_arm_lock(raw1394handle_t handle, struct raw1394_arm_request *arm_req,
 		nodeaddr_t a, quadlet_t *data)
 {
-	quadlet_t *response;
+	quadlet_t *response = NULL;
 	int num, offset;
 	int rcode = RCODE_COMPLETE;
 	int requested_length = 4;
@@ -245,11 +245,11 @@ do_arm_lock(raw1394handle_t handle, struct arm_request *arm_req,
 /* local plug ARM handler */
 static int
 plug1394_arm_callback (raw1394handle_t handle, 
-	struct arm_request_response *arm_req_resp,
+	struct raw1394_arm_request_response *arm_req_resp,
 	unsigned int requested_length,
 	void *pcontext, byte_t request_type)
 {
-	struct arm_request  *arm_req  = arm_req_resp->request;
+	struct raw1394_arm_request  *arm_req  = arm_req_resp->request;
 	
 	DEBUG( "request type=%d tcode=%d length=%d", request_type, arm_req->tcode, requested_length);
 	DEBUG( "context = %s", (char *) pcontext);
@@ -257,11 +257,11 @@ plug1394_arm_callback (raw1394handle_t handle,
 	
 	if (pcontext == g_arm_callback_context_out && requested_length == 4)
 	{
-		if (request_type == ARM_READ && arm_req->tcode == 4)
+		if (request_type == RAW1394_ARM_READ && arm_req->tcode == 4)
 		{
 			do_arm_read( handle, arm_req, CSR_O_MPR, (quadlet_t *) &g_data_out );
 		}
-		else if (request_type == ARM_LOCK)
+		else if (request_type == RAW1394_ARM_LOCK)
 		{
 			do_arm_lock( handle, arm_req, CSR_O_MPR, (quadlet_t *) &g_data_out );
 		}
@@ -272,11 +272,11 @@ plug1394_arm_callback (raw1394handle_t handle,
 	}
 	else if (pcontext == g_arm_callback_context_in && requested_length == 4)
 	{
-		if (request_type == ARM_READ)
+		if (request_type == RAW1394_ARM_READ)
 		{
 			do_arm_read( handle, arm_req, CSR_I_MPR, (quadlet_t *) &g_data_in  );
 		}
-		else if (request_type == ARM_LOCK)
+		else if (request_type == RAW1394_ARM_LOCK)
 		{
 			do_arm_lock( handle, arm_req, CSR_I_MPR, (quadlet_t *) &g_data_in );
 		}
@@ -310,7 +310,7 @@ plug1394_register_outputs(raw1394handle_t h, struct oMPR proto_mpr, struct oPCR 
 
 	return raw1394_arm_register( h, CSR_REGISTER_BASE + CSR_O_MPR, sizeof(g_data_out),
 		(byte_t *) &g_data_out, (unsigned long) &g_arm_reqhandle_out,
-		0, 0, ( ARM_READ | ARM_LOCK ) );
+		0, 0, ( RAW1394_ARM_READ | RAW1394_ARM_LOCK ) );
 }
 
 
@@ -330,7 +330,7 @@ plug1394_register_inputs(raw1394handle_t h, struct iMPR proto_mpr, struct iPCR p
 
 	return raw1394_arm_register( h, CSR_REGISTER_BASE + CSR_I_MPR, sizeof(g_data_in),
 		(byte_t *) &g_data_in, (unsigned long) &g_arm_reqhandle_in, 
-		0, 0, ( ARM_READ | ARM_LOCK ) );
+		0, 0, ( RAW1394_ARM_READ | RAW1394_ARM_LOCK ) );
 }
 
 

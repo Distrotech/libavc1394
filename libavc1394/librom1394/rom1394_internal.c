@@ -178,7 +178,8 @@ int proc_directory (raw1394handle_t handle, nodeid_t node, octlet_t offset,
     			case 0xD8:
     				subdir = offset + value*4;
     				if (subdir > selfdir) {
-    					proc_directory( handle, node, subdir, dir);
+    					if ( proc_directory( handle, node, subdir, dir) < 0 )
+							FAIL(node, "failed to read sub directory" );
     				} else {
     					FAIL(node, "unit directory with back reference");
     				}

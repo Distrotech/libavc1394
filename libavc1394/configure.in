@@ -28,10 +28,11 @@ AC_SUBST(lt_age)
 
 CFLAGS="$CFLAGS -Wall -Wunused"
 
-Xsed="sed -e s/^X//"
-LTLIBOBJS=`echo X"$LIBOBJS"|\
-           [$Xsed -e "s,\.[^.]* ,.lo ,g;s,\.[^.]*$,.lo,"]`
-AC_SUBST(LTLIBOBJS)
+# what were these for
+#Xsed="sed -e s/^X//"
+#LTLIBOBJS=`echo X"$LIBOBJS"|\
+#           [$Xsed -e "s,\.[^.]* ,.lo ,g;s,\.[^.]*$,.lo,"]`
+#AC_SUBST(LTLIBOBJS)
 
 AC_OUTPUT([
 Makefile 

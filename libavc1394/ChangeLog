@@ -1,3 +1,10 @@
+2003-04-23  Dan Dennedy <dan@dennedy.org>
+    * libplug1394: updated for changes in libraw1394 ARM
+    * librom1394: added error handling around the processing of sub directories.
+    * dvcont.c: keep looking for AV/C node if reading a configROM directory fails
+      (minimal configROMs on some hubs).
+    * added test/mkrfc2734.c to set ConfigROM for use with eth1394--needs testing.
+
 2002-10-30  Dan Dennedy
  	* added librom1394 manipulation functions.
 	* added test/setrom.c as example of using above.
