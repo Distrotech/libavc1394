@@ -1,6 +1,6 @@
 AC_INIT(Makefile.am)
 
-AM_INIT_AUTOMAKE(libavc1394, 0.2)
+AM_INIT_AUTOMAKE(libavc1394, 0.2.1)
 AM_CONFIG_HEADER(config.h)
 
 AC_PROG_CC
