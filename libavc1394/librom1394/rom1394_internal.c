@@ -4,7 +4,8 @@
  * Originally written by Andreas Micklei <andreas.micklei@ivistar.de>
  * Better directory and textual leaf processing provided by Stefan Lucke
  * Libtoolize-d and modifications by Dan Dennedy <dan@dennedy.org>
- * Currently maintained by Dan Dennedy <dan@dennedy.org>
+ * ROM manipulation routines by Dan Dennedy
+ * Currently maintained by Dan Dennedy
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -30,6 +31,7 @@
 #include <string.h>
 #include <malloc.h>
 #include <stdint.h>
+#include <unistd.h>
 
 /*
  * Read a textual leaf into a malloced ASCII string
@@ -163,13 +165,15 @@ int proc_directory (raw1394handle_t handle, nodeid_t node, octlet_t offset,
     			case 0x17:
     				dir->model_id = value;
     				break;
-    			case 0x81:
+    			case 0x81: // ASCII textual leaf offset
     			case 0x82:
-    				read_textual_leaf( handle, node, offset + value * 4, dir);
+					if (value != 0)
+						read_textual_leaf( handle, node, offset + value * 4, dir);
     				break;
-    			case 0xC3:
-    			case 0xC7:
-    			case 0xD1:
+				case 0xC1: // Descriptor directory
+    			case 0xC3: // vendor directory
+    			case 0xC7: // Module directory
+    			case 0xD1: // Unit directory
     			case 0xD4:
     			case 0xD8:
     				subdir = offset + value*4;
@@ -200,4 +204,151 @@ uint16_t make_crc (uint32_t *ptr, int length)
 		crc &= 0xffff;
 	}
 	return crc;
+}
+
+int set_unit_directory(quadlet_t *buffer, rom1394_directory *dir)
+{
+	int i, length;
+	quadlet_t *p = buffer;
+	int	key, value;
+	quadlet_t quadlet;
+
+	quadlet = ntohl(*p);
+	length = quadlet >> 16;
+    
+	DEBUG(-1, "directory has %d entries\n", length);
+	for (i=0; i < length; i++) {
+		p++;
+		quadlet = ntohl(*p);
+		key = quadlet >> 24;
+   		value = quadlet & 0x00FFFFFF;
+		DEBUG(-1, "key/value: %08x/%08x\n", key, value);
+		
+		switch (key) {
+			case 0x12:
+				if (dir->unit_spec_id != -1)
+				{
+					value = (key << 24) | (dir->unit_spec_id & 0x00FFFFFF);
+					*p = htonl(value);
+				}
+				break;
+			case 0x13:
+				if (dir->unit_sw_version != -1)
+				{
+					value = (key << 24) | (dir->unit_sw_version & 0x00FFFFFF);
+					*p = htonl(value);
+				}
+				break;
+			case 0x81:
+			case 0x82:
+				// TODO: unit textual leaves.
+				//if (n < dir->nr_textual_leaves)
+				//	set_textual_leaf( p + value, dir->textual_leaves[n++]);
+				break;
+		}
+	}
+	
+	/* compute CRC for unit */
+	p = buffer;
+	quadlet = (length << 16);
+	quadlet |= make_crc(p + 1, length) & 0x0000FFFF;
+	*p = htonl(quadlet);
+
+	return 0;
+}
+
+/* currently does not extend length of textual leaf */
+int
+set_textual_leaf(quadlet_t *buffer, const char *s)
+{
+	int i, length;
+	quadlet_t *p = buffer, *q = (quadlet_t*)s;
+	quadlet_t quadlet;
+	int n_q; /* number of existing quadlets */
+	
+	quadlet = ntohl(*p);
+	n_q = quadlet >> 16;
+	
+	/* set to simple ascii */
+	p++; *p++ = 0; *p++ = 0;
+	
+	length = (strlen(s) + 3) /4;
+	for (i = 0; i < length && i < n_q-2; i++)
+		*p++ = q[i];
+	
+	/* compute CRC for leaf */
+	p = buffer;
+	quadlet = (n_q << 16);
+	quadlet |= make_crc(p + 1, n_q) & 0x0000FFFF;
+	*p = htonl(quadlet);
+	
+	return 0;
+}
+
+/* make sure buffer is pointing to the end of the current rom image! */
+/* returns the number of new quadlets */
+int
+add_textual_leaf(quadlet_t *buffer, const char *s)
+{
+	int i, length;
+	quadlet_t *p = buffer, *q = (quadlet_t*) s;
+	quadlet_t quadlet;
+	int n_q = 3; /* number of quadlets added */
+
+	/* set to simple ascii */
+	p++; *p++ = 0; *p++ = 0;
+	
+	length = (strlen(s) + 3) /4;
+	n_q += length;
+	for (i = 0; i < length; i++)
+		*p++ = q[i];
+	
+	/* compute CRC for leaf */
+	p = buffer;
+	quadlet = ((n_q-1) << 16);
+	quadlet |= make_crc(p + 1, n_q-1) & 0x0000FFFF;
+	*p = htonl(quadlet);
+
+	return n_q;
+}
+
+int get_leaf_size(quadlet_t *buffer)
+{
+	int length;
+	quadlet_t quadlet;
+
+	quadlet = ntohl(*buffer);
+	length = quadlet >> 16;
+	return length + 1;
+}
+
+int get_unit_size(quadlet_t *buffer)
+{
+	int i, length;
+	quadlet_t *p = buffer;
+	int	key, value;
+	quadlet_t quadlet;
+	int x = 1;
+
+	quadlet = ntohl(*p);
+	length = quadlet >> 16;
+	x += length;
+    
+	DEBUG(-1, "directory has %d entries\n", length);
+	for (i=0; i < length; i++) {
+		p++;
+		quadlet = ntohl(*p);
+		key = quadlet >> 24;
+   		value = quadlet & 0x00FFFFFF;
+		DEBUG(-1, "key/value: %08x/%08x\n", key, value);
+		
+		switch (key) {
+			case 0x81: // textual leaf
+				if (value > 0)
+					x += get_leaf_size(p + value);
+				break;
+		}
+	}
+	
+	return x;
 }

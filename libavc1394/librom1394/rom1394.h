@@ -4,7 +4,8 @@
  * Originally written by Andreas Micklei <andreas.micklei@ivistar.de>
  * Better directory and textual leaf processing provided by Stefan Lucke
  * Libtoolize-d and modifications by Dan Dennedy <dan@dennedy.org>
- * Currently maintained by Dan Dennedy <dan@dennedy.org>
+ * ROM manipulation routines by Dan Dennedy
+ * Currently maintained by Dan Dennedy
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -89,6 +90,17 @@ rom1394_get_node_type(rom1394_directory *dir);
 void
 rom1394_free_directory(rom1394_directory *dir);
 
+
+/* supply null value to skip update of a particular field */
+
+int
+rom1394_get_size(quadlet_t *buffer);
+
+int
+rom1394_set_directory(quadlet_t *buffer, rom1394_directory *dir);
+
+int
+rom1394_add_unit(quadlet_t *buffer, rom1394_directory *dir);
 
 #ifdef __cplusplus
 }

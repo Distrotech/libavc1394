@@ -53,9 +53,11 @@ extern unsigned char g_fcp_response[];
 
 int avc1394_send_command(raw1394handle_t handle, nodeid_t node, quadlet_t command)
 {
-    quadlet_t cmd = htonl(command);
+    quadlet_t cmd[2];
+	cmd[0] = htonl(command);
+	cmd[1] = 0;
 
-    return cooked1394_write(handle, 0xffc0 | node, FCP_COMMAND_ADDR, 4, &cmd);
+    return cooked1394_write(handle, 0xffc0 | node, FCP_COMMAND_ADDR, 8, cmd);
 }
 
 int avc1394_send_command_block(raw1394handle_t handle, nodeid_t node,
@@ -67,6 +69,7 @@ int avc1394_send_command_block(raw1394handle_t handle, nodeid_t node,
     return cooked1394_write(handle, 0xffc0 | node, FCP_COMMAND_ADDR,
                             command_len*4, command);
 }
+
 
 /*
  * Send an AV/C request to a device, wait for the corresponding AV/C
@@ -395,3 +398,66 @@ quadlet_t *avc1394_unit_info(raw1394handle_t handle, nodeid_t node)
     return response;
 }
 
+/*************** TARGET *******************************************************/
+
+avc1394_command_handler_t g_command_handler = NULL;
+
+int target_fcp_handler( raw1394handle_t handle, nodeid_t nodeid, int response, 
+	size_t length, unsigned char *data )
+{
+	int result;
+	struct avc1394_command_response cmd_resp;
+	quadlet_t *r = (quadlet_t *) &cmd_resp;
+	
+	/* initialize the response from the request */
+	r[0] = *(quadlet_t *)data;
+	cmd_resp.operand[1] = 0;
+	cmd_resp.operand[2] = 0;
+	cmd_resp.operand[3] = 0;
+	cmd_resp.operand[4] = 0;
+
+	if ( response != 0 )
+	{
+		return 0;
+	}
+	else
+	{
+#ifdef DEBUG
+		printf( "command hex: %08x %08x\n", r[0], r[1]);
+		printf( "command: type=%x subunit_type=%x subunit_id=%x opcode=%x operand0=%x\n",
+			cmd_resp.status, cmd_resp.subunit_type, cmd_resp.subunit_id, cmd_resp.opcode, cmd_resp.operand[0]);
+#endif
+
+		result = g_command_handler( &cmd_resp );
+		
+		if (result == 0) 
+			cmd_resp.status = AVC1394_RESP_NOT_IMPLEMENTED;
+		
+#ifdef DEBUG
+		printf( "response: status=%x subunit_type=%x subunit_id=%x opcode=%x operand0=%x\n",
+			cmd_resp.status, cmd_resp.subunit_type, cmd_resp.subunit_id, cmd_resp.opcode, cmd_resp.operand[0]);
+		printf( "response hex: %08x %08x\n", r[0], r[1]);
+#endif
+		
+		return cooked1394_write(handle, 0xffc0 | nodeid, FCP_RESPONSE_ADDR, 8, r);
+	}
+}
+
+
+int
+avc1394_init_target( raw1394handle_t handle, avc1394_command_handler_t cmd_handler)
+{
+	if (cmd_handler == NULL)
+		return -1;
+	g_command_handler = cmd_handler;
+	if (raw1394_set_fcp_handler( handle, target_fcp_handler ) < 0)
+		return -1;
+	return raw1394_start_fcp_listen( handle );
+}
+
+
+int
+avc1394_close_target( raw1394handle_t handle )
+{
+	return raw1394_stop_fcp_listen(handle);
+}

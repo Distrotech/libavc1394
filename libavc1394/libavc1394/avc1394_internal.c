@@ -84,3 +84,5 @@ void stop_avc_response_handler(raw1394handle_t handle)
 {
     raw1394_stop_fcp_listen(handle);
 }
+
+

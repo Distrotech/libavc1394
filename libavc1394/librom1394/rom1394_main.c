@@ -4,7 +4,8 @@
  * Originally written by Andreas Micklei <andreas.micklei@ivistar.de>
  * Better directory and textual leaf processing provided by Stefan Lucke
  * Libtoolize-d and modifications by Dan Dennedy <dan@dennedy.org>
- * Currently maintained by Dan Dennedy <dan@dennedy.org>
+ * ROM manipulation routines by Dan Dennedy
+ * Currently maintained by Dan Dennedy
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -169,4 +170,191 @@ void rom1394_free_directory(rom1394_directory *dir)
     dir->textual_leafs = NULL;
     dir->max_textual_leafs = dir->nr_textual_leafs = 0;
     if (dir->label) free(dir->label);
+}
+
+
+/****************** UPDATE CONFIG ROM IMAGE *******************************/
+
+/* returns number of quadlets */
+int rom1394_get_size(quadlet_t *buffer)
+{
+	int i, length;
+	quadlet_t *p = buffer + ROM1394_ROOT_DIRECTORY/4;
+	int	key, value;
+	quadlet_t quadlet;
+	int x = ROM1394_ROOT_DIRECTORY/4 + 1;
+
+	quadlet = ntohl(*p);
+	length = quadlet >> 16;
+	x += length;
+    
+	DEBUG(-1, "directory has %d entries\n", length);
+	for (i=0; i < length; i++) {
+		p++;
+		quadlet = ntohl(*p);
+		key = quadlet >> 24;
+   		value = quadlet & 0x00FFFFFF;
+		DEBUG(-1, "key/value: %08x/%08x\n", key, value);
+		
+		switch (key) {
+   			case 0xD1: // Unit directory
+				if (value > 0)
+					x += get_unit_size(p + value);
+				break;
+			case 0x81: // textual leaf
+				if (value > 0)
+					x += get_leaf_size(p + value);
+				break;
+		}
+	}
+	
+	return x;
+}
+
+
+int rom1394_add_unit(quadlet_t *buffer, rom1394_directory *dir)
+{	
+	int i, length;
+	quadlet_t *p = buffer + ROM1394_ROOT_DIRECTORY/4;
+	int	key, value;
+	quadlet_t quadlet;
+	int offset;
+	int n_q = 5; /* number of additional quadlets to add */
+	int len = rom1394_get_size( buffer);
+	
+	if (dir->nr_textual_leafs > 0)
+		n_q++; /* we only support one textual leaf per unit */
+	
+	/* get root dir length and move p to after root dir */
+	quadlet = ntohl(*p);
+	length = quadlet >> 16;
+	p += length + 1;
+	
+	/* get the difference between current position and beginning */
+	offset = (p - buffer);
+	
+	/* move the rest down */
+	/* size = original length minus offset */
+	memmove( p+n_q, p, (len-offset) * sizeof(quadlet_t) );
+	len += n_q;
+	
+	/* reset p to beginning of root */
+	p = buffer + ROM1394_ROOT_DIRECTORY/4;
+	
+	/* adjust offsets in root dir */
+	for (i=0; i < length; i++) {
+		p++;
+		quadlet = ntohl(*p);
+		key = quadlet >> 24;
+		value = quadlet & 0x00FFFFFF;
+		DEBUG(-1, "key/value: %08x/%08x\n", key, value);
+		
+		switch (key) {
+			case 0xD1: // Unit directory
+			case 0x81: // textual leaves
+			case 0x82:
+				value = (key << 24) | ((value + n_q) & 0x00FFFFFF);
+				*p = htonl(value);
+				break;
+		}
+	}
+	
+	/* add unit directory entry to root */
+	p++;
+	value = (0xD1 << 24) | 1;
+	*p++ = htonl(value);
+	
+	/* make new unit directory */
+	p++;
+	value = (0x12 << 24) | (dir->unit_spec_id & 0x00FFFFFF);
+	*p++ = htonl(value);
+	value = (0x13 << 24) | (dir->unit_sw_version & 0x00FFFFFF);
+	*p++ = htonl(value);
+	value = (0x17 << 24) | (dir->model_id & 0x00FFFFFF);
+	*p++ = htonl(value);
+	if (dir->nr_textual_leafs > 0)
+	{
+		value = (0x81 << 24) | (((buffer+len)-p) & 0x00FFFFFF);
+		*p++ = htonl(value);
+			len += add_textual_leaf( buffer + len, dir->textual_leafs[0]);
+	}
+	
+	/* compute CRC for unit directory */
+	p = buffer + offset + 1;
+	quadlet = ((n_q-2) << 16);
+	quadlet |= make_crc(p + 1, n_q-2) & 0x0000FFFF;
+	*p = htonl(quadlet);
+	
+	/* increment root directory length */
+	length++;
+	
+	/* compute CRC for root */
+	p = buffer + ROM1394_ROOT_DIRECTORY/4;
+	quadlet = (length << 16);
+	quadlet |= make_crc(p + 1, length) & 0x0000FFFF;
+	*p = htonl(quadlet);
+
+	return 0;
+}
+
+
+int rom1394_set_directory(quadlet_t *buffer, rom1394_directory *dir)
+{
+	int i, length;
+	quadlet_t *p = buffer + ROM1394_ROOT_DIRECTORY/4;
+	int	key, value;
+	quadlet_t quadlet;
+	int n = 0; /* iterator thru textual leaves */
+
+	quadlet = ntohl(*p);
+	length = quadlet >> 16;
+    
+	DEBUG(-1, "directory has %d entries\n", length);
+	for (i=0; i < length; i++) {
+		p++;
+		quadlet = ntohl(*p);
+		key = quadlet >> 24;
+   		value = quadlet & 0x00FFFFFF;
+		DEBUG(-1, "key/value: %08x/%08x\n", key, value);
+		
+		switch (key) {
+			case 0x03:
+				if (dir->vendor_id != -1)
+				{
+					value = (key << 24) | (dir->vendor_id & 0x00FFFFFF);
+					*p = htonl(value);
+				}
+				break;
+			case 0x17:
+				if (dir->model_id != -1)
+				{
+					value = (key << 24) | (dir->model_id & 0x00FFFFFF);
+					*p = htonl(value);
+				}
+				break;
+			case 0x0C:
+				if (dir->node_capabilities != -1)
+				{
+					value = (key << 24) | (dir->node_capabilities & 0x00FFFFFF);
+					*p = htonl(value);
+				}
+				break;
+   			case 0xD1: // Unit directory
+				/* update existing unit directory only */
+				set_unit_directory( p + value, dir);
+			case 0x81:
+			case 0x82:
+				if (n < dir->nr_textual_leafs)
+					set_textual_leaf( p + value, dir->textual_leafs[n++]);
+				break;
+		}
+	}
+	
+	/* compute CRC for root */
+	p = buffer + ROM1394_ROOT_DIRECTORY/4;
+	quadlet = (length << 16);
+	quadlet |= make_crc(p + 1, length) & 0x0000FFFF;
+	*p = htonl(quadlet);
+
+	return 0;
 }

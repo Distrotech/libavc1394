@@ -1,3 +1,9 @@
+2002-10-30  Dan Dennedy
+ 	* added librom1394 manipulation functions.
+	* added test/setrom.c as example of using above.
+	* added functions to libavc1394 for target mode applications.
+	* added test/avc_vcr.c as example of an AV/C target. 
+
 2002-10-22  Dan Dennedy
 	* added libplug1394/*
 	* added test/plugctl.c
