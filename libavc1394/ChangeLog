@@ -1,16 +1,24 @@
+
+2003-12-07  Dan Dennedy <dan@dennedy.org>
+	* libavc1394/avc1394.h: apply patch from Tim Coppefield to add more
+	  operands and to correct the size of a command response.
+	* libavc1394/avc1394_simple.c: apply patch from Tim Coppefield to
+	  correct the command response in the FCP handler. Also adds more debug
+	  info.
+
 2003-11-24  Dan Dennedy <dan@dennedy.org>
-    * libavc1934/avc1394_vcr.c: patch from Phiipp Marek to report Recording
-      vs Recording Paused.
+	* libavc1934/avc1394_vcr.c: patch from Phiipp Marek to report Recording
+	  vs Recording Paused.
 
 2003-04-23  Dan Dennedy <dan@dennedy.org>
-    * libplug1394: updated for changes in libraw1394 ARM
-    * librom1394: added error handling around the processing of sub directories.
-    * dvcont.c: keep looking for AV/C node if reading a configROM directory fails
-      (minimal configROMs on some hubs).
-    * added test/mkrfc2734.c to set ConfigROM for use with eth1394--needs testing.
+	* libplug1394: updated for changes in libraw1394 ARM
+	* librom1394: added error handling around the processing of sub directories.
+	* dvcont.c: keep looking for AV/C node if reading a configROM directory fails
+	  (minimal configROMs on some hubs).
+	* added test/mkrfc2734.c to set ConfigROM for use with eth1394--needs testing.
 
 2002-10-30  Dan Dennedy
- 	* added librom1394 manipulation functions.
+	* added librom1394 manipulation functions.
 	* added test/setrom.c as example of using above.
 	* added functions to libavc1394 for target mode applications.
 	* added test/avc_vcr.c as example of an AV/C target. 

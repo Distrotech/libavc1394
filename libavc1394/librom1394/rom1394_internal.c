@@ -136,7 +136,7 @@ int proc_directory (raw1394handle_t handle, nodeid_t node, octlet_t offset,
 
     QUADREADERR(handle, node, offset, &quadlet);
     if (cooked1394_read(handle, (nodeid_t) 0xffc0 | node, offset, sizeof(quadlet_t), &quadlet) < 0) {
-        FAIL( node, "invalid root directory length");
+        return -1;
     } else {
         quadlet = htonl(quadlet);
     	length = quadlet>>16;

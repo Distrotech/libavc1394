@@ -153,7 +153,6 @@ rom1394_node_types rom1394_get_node_type(rom1394_directory *dir)
 	if (dir->unit_spec_id == 0xA02D) {
 		if (dir->unit_sw_version == 0x100) {
 			return ROM1394_NODE_TYPE_DC;
-//		} else if (unit_sw_version == 0x10000 || unit_sw_version == 0x10001) {
         } else if (dir->unit_sw_version & 0x010000) {
 			return ROM1394_NODE_TYPE_AVC;
 		}

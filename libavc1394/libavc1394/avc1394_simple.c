@@ -410,11 +410,8 @@ int target_fcp_handler( raw1394handle_t handle, nodeid_t nodeid, int response,
 	quadlet_t *r = (quadlet_t *) &cmd_resp;
 	
 	/* initialize the response from the request */
-	r[0] = *(quadlet_t *)data;
-	cmd_resp.operand[1] = 0;
-	cmd_resp.operand[2] = 0;
-	cmd_resp.operand[3] = 0;
-	cmd_resp.operand[4] = 0;
+	memset(&cmd_resp, 0, sizeof(cmd_resp));
+	memcpy(r, data, length);
 
 	if ( response != 0 )
 	{
@@ -423,9 +420,17 @@ int target_fcp_handler( raw1394handle_t handle, nodeid_t nodeid, int response,
 	else
 	{
 #ifdef DEBUG
-		printf( "command hex: %08x %08x\n", r[0], r[1]);
-		printf( "command: type=%x subunit_type=%x subunit_id=%x opcode=%x operand0=%x\n",
-			cmd_resp.status, cmd_resp.subunit_type, cmd_resp.subunit_id, cmd_resp.opcode, cmd_resp.operand[0]);
+	    {
+		int q, z;
+		z = (length % 4) ? length + (4 - (length % 4)) : length;
+		printf("----> ");
+		for (q = 0; q < z / 4; q++)
+		    printf("%08x ", r[q]);
+		printf("(length %d)\n", length);
+		printf("----> type=0x%02x subunit_type=0x%x subunit_id=0x%x opcode=0x%x operand0=0x%x\n",
+			cmd_resp.status, cmd_resp.subunit_type,
+			cmd_resp.subunit_id, cmd_resp.opcode, cmd_resp.operand[0]);
+	    }
 #endif
 
 		result = g_command_handler( &cmd_resp );
@@ -434,12 +439,20 @@ int target_fcp_handler( raw1394handle_t handle, nodeid_t nodeid, int response,
 			cmd_resp.status = AVC1394_RESP_NOT_IMPLEMENTED;
 		
 #ifdef DEBUG
-		printf( "response: status=%x subunit_type=%x subunit_id=%x opcode=%x operand0=%x\n",
-			cmd_resp.status, cmd_resp.subunit_type, cmd_resp.subunit_id, cmd_resp.opcode, cmd_resp.operand[0]);
-		printf( "response hex: %08x %08x\n", r[0], r[1]);
+	    {
+		int q, z;
+		z = (length % 4) ? length + (4 - (length % 4)) : length;
+		printf("<---- ");
+		for (q = 0; q < z / 4; q++)
+		    printf("%08x ", r[q]);
+		printf("(length %d)\n", length);
+		printf("<---- type=0x%02x subunit_type=0x%x subunit_id=0x%x opcode=0x%x operand0=0x%x\n",
+			cmd_resp.status, cmd_resp.subunit_type,
+			cmd_resp.subunit_id, cmd_resp.opcode, cmd_resp.operand[0]);
+	    }
 #endif
 		
-		return cooked1394_write(handle, 0xffc0 | nodeid, FCP_RESPONSE_ADDR, 8, r);
+		return cooked1394_write(handle, 0xffc0 | nodeid, FCP_RESPONSE_ADDR, length, r);
 	}
 }
 

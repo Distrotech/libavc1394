@@ -228,7 +228,7 @@ int subunit_status( avc1394_cmd_rsp *cr )
 	case AVC1394_VCR_CMD_MEDIUM_INFO:
 		cr->status = AVC1394_RESP_STABLE;
 		cr->operand[0] = AVC1394_VCR_OPERAND_MEDIUM_INFO_DVCR_STD;
-		cr->operand[1] = AVC1394_VCR_OPERAND_MEDIUM_INFO_OK;
+		cr->operand[1] = AVC1394_VCR_OPERAND_MEDIUM_INFO_SVHS_OK;
 		break;
 	default:
 		fprintf( stderr, "subunit status command 0x%02x not supported\n", cr->opcode );
