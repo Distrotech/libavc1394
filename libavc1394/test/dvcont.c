@@ -4,7 +4,7 @@
  * Code Started January 1, 2001.
  * Version 0.04
  * Adapted to libavc1394 by Dan Dennedy <dan@dennedy.org>
- *
+ * Timeout handling added by Bevis King
  *
  * This code is based off a GNU project called gscanbus by Andreas Micklei
  * -- Thanks Andreas for the great code! --
@@ -38,9 +38,15 @@
 #include <errno.h>
 #include <unistd.h>
 #include <stdlib.h>
+#include <signal.h>
 
+#define TYPEREQ_TIMEOUT	5
+extern void timeout_happened();
+int timeout=0;
 
-#define version "Version 0.04"
+int i;
+
+#define version "Version 0.05"
 
 
 void show_help() {
@@ -72,8 +78,9 @@ int main (int argc, char *argv[])
 	raw1394handle_t handle;
 	quadlet_t quadlet;	
 	int device;
-	int i;
+	int retcode;
 	int verbose;
+	struct sigaction act;
 
 	// Declare some default values.
 	
@@ -107,11 +114,34 @@ int main (int argc, char *argv[])
 		fprintf(stderr,"something is wrong here\n");
 	}
 
-    for (i=0; i < raw1394_get_nodecount(handle); ++i)
-        if ( avc1394_check_subunit_type(handle, i, AVC1394_SUBUNIT_TYPE_VCR) ) {
-            device = i;
-            break;
-        }
+#ifdef SA_RESTART
+	act.sa_handler = timeout_happened;
+	sigemptyset(&(act.sa_mask));
+	act.sa_flags = 0;
+	sigaction( SIGALRM, &act, NULL );
+#else
+	fprintf( stderr, 
+		"can't stop system call from restarting - warnings only\n");
+	signal( SIGALRM, timeout_happened );
+#endif
+
+    	for (i=0; i < raw1394_get_nodecount(handle); ++i)
+	{
+		timeout=0;
+		alarm( TYPEREQ_TIMEOUT );
+
+		retcode= avc1394_check_subunit_type(handle, i,
+						AVC1394_SUBUNIT_TYPE_VCR);
+		if( timeout >= 1 )
+			retcode = 0;  /* assume things failed */
+		if( retcode == 1 )
+		{
+		    device = i;
+		    break;
+		}
+		alarm( 0 );
+	}
+	signal( SIGALRM, SIG_DFL );
 
 	for (i = 1; i < argc; ++i) {
         
@@ -171,3 +201,12 @@ int main (int argc, char *argv[])
 	return 0;
 }
 
+void timeout_happened()
+{
+	fprintf( stderr, "request to node %d about it's type timed out\n",
+			i );
+	timeout++;
+
+	alarm( 5 );
+	return;
+}

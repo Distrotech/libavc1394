@@ -1,6 +1,8 @@
 2001-06-10  Dan Dennedy <dan@dennedy.org>
 	* bug fix in librom1394/rom1394_internal.c:proc_directory, a failed
 	  read on first quadlet could lead to an invalid directory length
+	* bug fix in librom1394/rom1394_main.c:rom1394_get_directory, was not
+	  initializing all struct members
 	* librom1394 now first checks for valid node
 
 2001-05-27  Dan Dennedy <dan@dennedy.org>
