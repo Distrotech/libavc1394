@@ -293,3 +293,26 @@ avc1394_vcr_get_timecode(raw1394handle_t handle, nodeid_t node)
     return output;
 }
 
+
+/* Go to the time code on tape in format HH:MM:SS:FF */
+void
+avc1394_vcr_seek_timecode(raw1394handle_t handle, nodeid_t node, char *timecode)
+{
+    quadlet_t  request[2];
+	unsigned int hh,mm,ss,ff;
+        
+    request[0] = CTLVCR0 | AVC1394_VCR_COMMAND_TIME_CODE | 
+        AVC1394_VCR_OPERAND_TIME_CODE_CONTROL;
+
+    // consumer timecode format
+    sscanf(timecode, "%2x:%2x:%2x:%2x", &hh, &mm, &ss, &ff);
+	request[1] = 
+		((ff & 0x000000ff) << 24) |
+		((ss & 0x000000ff) << 16) |
+		((mm & 0x000000ff) <<  8) |
+		((hh & 0x000000ff) <<  0) ;
+	printf("timecode: %08x\n", request[1]);
+    
+    avc1394_send_command_block( handle, node, request, 2);
+}
+

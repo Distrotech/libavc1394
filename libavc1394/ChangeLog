@@ -1,3 +1,12 @@
+2002-09-25  Dan Dennedy <dan@dennedy.org>
+	* avc1394_simple.c: added timeout support to avc transactions.
+	* avc1394_vcr.c: added avc1394_vcr_seek_timecode(), but discovered
+	  it is not supported by most devices.
+	* dvcont.c: added seek command to test above, display usage if no
+	  commands entered, added hidden pluginfo command for playing around,
+	  added more verbose output.
+	* configure.in: bump version.
+
 2002-04-04  Dan Dennedy <dan@dennedy.org>
     * Applied patch from Kirk Bateman to handle unicode US_ENGLISH
       (Microsoft specific?) textual leaves in librom1394. Thanks!

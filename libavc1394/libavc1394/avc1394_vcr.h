@@ -103,6 +103,10 @@ avc1394_vcr_decode_status(quadlet_t response);
 char *
 avc1394_vcr_get_timecode(raw1394handle_t handle, nodeid_t node);
 
+/* Go to the time code on tape in format HH:MM:SS:FF */
+void
+avc1394_vcr_seek_timecode(raw1394handle_t handle, nodeid_t node, char *timecode);
+
 #ifdef __cplusplus
 }
 #endif

@@ -29,7 +29,7 @@
 
 // Load up the needed includes.
 #include <config.h>
-#include <librom1394/rom1394.h>
+#include <libavc1394/rom1394.h>
 #include <libavc1394/avc1394.h>
 #include <libavc1394/avc1394_vcr.h>
 #include <libraw1394/raw1394.h>
@@ -38,8 +38,9 @@
 #include <stdio.h>
 #include <errno.h>
 #include <stdlib.h>
+#include <string.h>
 
-#define version "Version 0.2"
+#define version "Version 0.3"
 
 void show_help() {
 
@@ -60,6 +61,7 @@ printf("\nprevindex - Tell the camera to go to the previous index point and paus
 printf("\nrecord - Tell the camera to record (use with caution!)");
 printf("\neject - Tell the camera to eject the tape (awe your friends!)");
 printf("\ntimecode - Report the timecode from the tape (HH:MM:SS:FF)");
+printf("\nseek - Tell the camera to go to the <timecode> (HH:MM:SS:FF)");
 printf("\nstatus - Report the status of the device");
 printf("\nverbose - Tell the program to tell you debug info.");
 printf("\nversion - Tell the program to tell you the program version.");
@@ -76,11 +78,15 @@ int main (int argc, char *argv[])
 	raw1394handle_t handle;
 	int device = -1;
 	int verbose = 0;
-    int i;
+    int i, j;
 	int speed;
 	char *timecode;
 
-	// Declare some default values.
+	if (argc < 2)
+	{
+		show_help();
+		exit(0);
+	}
 	
 #ifdef RAW1394_V_0_8
 	handle = raw1394_get_handle();
@@ -115,6 +121,19 @@ int main (int argc, char *argv[])
     	    exit(1);
         }
 
+		for (j = 1; j < argc; ++j) {
+			if (strcmp("verbose", argv[j]) == 0) {
+				printf ("node %d type = %d\n", i, rom1394_get_node_type(&rom_dir));
+				if ( (rom1394_get_node_type(&rom_dir) == ROM1394_NODE_TYPE_AVC) ) {
+					printf ("node %d AVC video recorder? %s\n", i, avc1394_check_subunit_type(handle, i, AVC1394_SUBUNIT_TYPE_TAPE_RECORDER) ? "yes":"no");
+					printf ("node %d AVC disk recorder? %s\n", i, avc1394_check_subunit_type(handle, i, AVC1394_SUBUNIT_TYPE_DISC_RECORDER) ? "yes":"no");
+					printf ("node %d AVC tuner? %s\n", i, avc1394_check_subunit_type(handle, i, AVC1394_SUBUNIT_TYPE_TUNER) ? "yes":"no");
+					printf ("node %d AVC video camera? %s\n", i, avc1394_check_subunit_type(handle, i, AVC1394_SUBUNIT_TYPE_VIDEO_CAMERA) ? "yes":"no");
+					printf ("node %d AVC video monitor? %s\n", i, avc1394_check_subunit_type(handle, i, AVC1394_SUBUNIT_TYPE_VIDEO_MONITOR) ? "yes":"no");
+				}
+			}
+		}
+		
         if ( (rom1394_get_node_type(&rom_dir) == ROM1394_NODE_TYPE_AVC) &&
             avc1394_check_subunit_type(handle, i, AVC1394_SUBUNIT_TYPE_VCR))
         {
@@ -171,40 +190,61 @@ int main (int argc, char *argv[])
         		free(timecode);
     		}
 	    
+	    } else if (strcmp("seek", argv[i]) == 0) {
+	        avc1394_vcr_seek_timecode(handle, device, argv[i+1]);
+	    
 	    } else if (strcmp("version", argv[i]) == 0) {
-		printf("\nDV Camera Console Control Program\n%s\nBy: Jason Howard, Dan Dennedy, and Andreas Micklei\n", version);
+			printf("\nDV Camera Console Control Program\n%s\nBy: Jason Howard, Dan Dennedy, and Andreas Micklei\n", version);
 	    
 	    } else if (strcmp("verbose", argv[i]) == 0) {
-		printf("successfully got handle\n");
-      		printf("current generation number: %d\n", raw1394_get_generation(handle));
-		printf("using first card found: %d nodes on bus, local ID is %d\n",
-		raw1394_get_nodecount(handle),
-		raw1394_get_local_id(handle) & 0x3f);
-	    	verbose = 1;
+			printf("successfully got handle\n");
+			printf("current generation number: %d\n", raw1394_get_generation(handle));
+			printf("using first card found: %d nodes on bus, local ID is %d\n",
+			raw1394_get_nodecount(handle),
+			raw1394_get_local_id(handle) & 0x3f);
+			verbose = 1;
 
-	    }	else if (strcmp("next", argv[i]) == 0) {
-		avc1394_vcr_next(handle, device);
+	    } else if (strcmp("next", argv[i]) == 0) {
+			avc1394_vcr_next(handle, device);
 	    
-	    }	else if (strcmp("nextindex", argv[i]) == 0) {
-		avc1394_vcr_next_index(handle, device);
+	    } else if (strcmp("nextindex", argv[i]) == 0) {
+			avc1394_vcr_next_index(handle, device);
 	    
-	    }	else if (strcmp("prev", argv[i]) == 0) {
-		avc1394_vcr_previous(handle, device);
+	    } else if (strcmp("prev", argv[i]) == 0) {
+			avc1394_vcr_previous(handle, device);
 	    
-	    }	else if (strcmp("previndex", argv[i]) == 0) {
-		avc1394_vcr_previous_index(handle, device);
+	    } else if (strcmp("previndex", argv[i]) == 0) {
+			avc1394_vcr_previous_index(handle, device);
 	    
-	    }	else if (strcmp("help", argv[i]) == 0) {
-		show_help ();
+	    } else if (strcmp("help", argv[i]) == 0) {
+			show_help ();
 	    
-	    }   else if (strcmp("dev", argv[i]) == 0) {
+	    } else if (strcmp("dev", argv[i]) == 0) {
 		
-		device = atoi(argv[(i+1)]);
+			device = atoi(argv[(i+1)]);
 		
     		if (verbose == 1) {
     			printf("\nUsing Device: %d\n", device);
     		}
-        }	
+
+		} else if (strcmp( "pluginfo", argv[i]) == 0) {
+			quadlet_t request[2];
+			quadlet_t *response;
+		
+			request[0] = AVC1394_CTYPE_STATUS | AVC1394_SUBUNIT_TYPE_TAPE_RECORDER | AVC1394_SUBUNIT_ID_0
+						 | AVC1394_COMMAND_PLUG_INFO | 0x00;
+			request[1] = 0xFFFFFFFF;
+			response = avc1394_transaction_block(handle, device, request, 2, 2);
+			if (response != NULL) {
+				printf("serial bus input plugs = %d\n", (unsigned char) ((response[1]>>24) & 0xff));
+				printf("serial bus output plugs = %d\n", (unsigned char) ((response[1]>>16) & 0xff));
+				printf("external input plugs = %d\n", (unsigned char) ((response[1]>>8) & 0xff));
+				printf("external output plugs = %d\n", (unsigned char) ((response[1]) & 0xff));
+#ifdef DEBUG
+				fprintf(stderr, "pluginfo: 0x%08X 0x%08X\n", response[0], response[1]);
+#endif
+			}
+		}
 	}
 		
     raw1394_destroy_handle(handle);

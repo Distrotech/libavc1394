@@ -40,6 +40,7 @@
 /* For select() */
 #include <sys/time.h>
 #include <sys/types.h>
+#include <sys/poll.h>
 #include <unistd.h>
 
 #include <string.h>
@@ -80,7 +81,10 @@ quadlet_t avc1394_transaction(raw1394handle_t handle, nodeid_t node,
                           quadlet_t quadlet, int retry)
 {
 
-    quadlet_t response;
+    quadlet_t response = 0;
+    struct pollfd raw1394_poll;
+    raw1394_poll.fd = raw1394_get_fd(handle);
+    raw1394_poll.events = POLLIN;
 
     init_avc_response_handler(handle);
 
@@ -91,20 +95,36 @@ quadlet_t avc1394_transaction(raw1394handle_t handle, nodeid_t node,
             continue;
         }
 
-        raw1394_loop_iterate(handle);
-        response = ntohl(*((quadlet_t *)g_fcp_response));
-        while ((response & 0x0F000000) == 0x0F000000) {
-            fprintf(stderr,"INTERIM\n");
-            raw1394_loop_iterate(handle);
-            response = ntohl(*((quadlet_t *)g_fcp_response));
-        }
-        stop_avc_response_handler(handle);
-
-#ifdef DEBUG      
-        fprintf(stderr, "avc1394_transaction: Got AVC response 0x%0x (%s)\n", response, decode_response(response));
+        if ( poll( &raw1394_poll, 1, 50) > 0 ) {
+            if (raw1394_poll.revents & POLLIN) {
+				raw1394_loop_iterate(handle);
+				response = ntohl(*((quadlet_t *)g_fcp_response));
+			}
+		}
+		if (response != 0) {
+			while (AVC1394_MASK_RESPONSE(response) == AVC1394_RESPONSE_INTERIM) {
+#ifdef DEBUG
+				fprintf(stderr,"INTERIM\n");
+#endif
+				if ( poll( &raw1394_poll, 1, 50) > 0 ) {
+					if (raw1394_poll.revents & POLLIN) {
+						raw1394_loop_iterate(handle);
+						response = ntohl(*((quadlet_t *)g_fcp_response));
+					}
+				}
+			}
+		}
+#ifdef DEBUG
+		if (response != 0)
+			fprintf(stderr, "avc1394_transaction: Got AVC response 0x%0x (%s)\n", response, decode_response(response));
 #endif
 
-        return response;
+        if (response != 0 && 
+			(AVC1394_MASK_RESPONSE(response) == AVC1394_RESPONSE_STABLE))
+		{
+			stop_avc_response_handler(handle);
+			return response;
+		}
     } while (--retry >= 0);
 
     stop_avc_response_handler(handle);
@@ -127,7 +147,10 @@ quadlet_t *avc1394_transaction_block(raw1394handle_t handle, nodeid_t node,
                                  quadlet_t *buf, int len, int retry)
 {
 
-    quadlet_t *response;
+    quadlet_t *response = NULL;
+    struct pollfd raw1394_poll;
+    raw1394_poll.fd = raw1394_get_fd(handle);
+    raw1394_poll.events = POLLIN;
 
     init_avc_response_handler(handle);
 
@@ -138,27 +161,45 @@ quadlet_t *avc1394_transaction_block(raw1394handle_t handle, nodeid_t node,
             continue;
         }
 
-        raw1394_loop_iterate(handle);
-        response = (quadlet_t *)g_fcp_response;
-        while ((response[0] & 0x0F000000) == 0x0F000000) {
-            fprintf(stderr,"INTERIM\n");
-            raw1394_loop_iterate(handle);
-            response = (quadlet_t *)g_fcp_response;
-        }
-        stop_avc_response_handler(handle);
-        ntohl_block(response, len);
+        if ( poll( &raw1394_poll, 1, 50) > 0 ) {
+            if (raw1394_poll.revents & POLLIN) {
+				raw1394_loop_iterate(handle);
+				response = (quadlet_t *)g_fcp_response;
+				ntohl_block(response, len);
+			}
+		}
+		if (response != NULL) {
+			while (AVC1394_MASK_RESPONSE(response[0]) == AVC1394_RESPONSE_INTERIM) {
+#ifdef DEBUG
+				fprintf(stderr,"INTERIM\n");
+#endif
+				if ( poll( &raw1394_poll, 1, 50) > 0 ) {
+					if (raw1394_poll.revents & POLLIN) {
+						raw1394_loop_iterate(handle);
+						response = (quadlet_t *)g_fcp_response;
+						ntohl_block(response, len);
+					}
+				}
+			}
+		}
 
 #ifdef DEBUG
-        {
-        int i;
-        fprintf(stderr, "avc1394_transaction_block received response: ");
-        for (i=0; i<len; i++) fprintf(stderr, " 0x%08X", response[i]);
-        fprintf(stderr, " (%s)\n", decode_response(response[0]));
+        if (response != NULL) {
+			int i;
+			fprintf(stderr, "avc1394_transaction_block received response: ");
+			for (i=0; i<len; i++) fprintf(stderr, " 0x%08X", response[i]);
+			fprintf(stderr, " (%s)\n", decode_response(response[0]));
         }
 #endif
-
-        return response;
+		
+		if (response != NULL &&
+			(AVC1394_MASK_RESPONSE(response[0]) == AVC1394_RESPONSE_STABLE))
+		{
+			stop_avc_response_handler(handle);
+			return response;
+		}
     } while (--retry >= 0);
+	
     stop_avc_response_handler(handle);
     return NULL;
 }
