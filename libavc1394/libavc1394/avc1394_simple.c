@@ -53,11 +53,10 @@ extern unsigned char g_fcp_response[];
 
 int avc1394_send_command(raw1394handle_t handle, nodeid_t node, quadlet_t command)
 {
-    quadlet_t cmd[2];
-	cmd[0] = htonl(command);
-	cmd[1] = 0;
+    quadlet_t cmd;
+	cmd = htonl(command);
 
-    return cooked1394_write(handle, 0xffc0 | node, FCP_COMMAND_ADDR, 8, cmd);
+    return cooked1394_write(handle, 0xffc0 | node, FCP_COMMAND_ADDR, 4, &cmd);
 }
 
 int avc1394_send_command_block(raw1394handle_t handle, nodeid_t node,
