@@ -15,7 +15,7 @@ int cooked1394_read(raw1394handle_t handle, nodeid_t node, nodeaddr_t addr,
     for(i=0; i<MAXTRIES; i++) {
         retval = raw1394_read(handle, node, addr, length, buffer);
 #ifdef RAW1394_V_0_9
-		nanosleep(&ts, NULL);
+		//nanosleep(&ts, NULL);
         if (retval < 0 && errno == EAGAIN)
             nanosleep(&ts, NULL);
         else

@@ -29,6 +29,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <malloc.h>
+#include <stdint.h>
 
 /*
  * Read a textual leaf into a malloced ASCII string
@@ -184,3 +185,19 @@ int proc_directory (raw1394handle_t handle, nodeid_t node, octlet_t offset,
     return 0;
 }
 
+uint16_t make_crc (uint32_t *ptr, int length)
+{
+	int shift;
+	uint32_t crc, sum, data;
+
+	crc = 0;
+	for (; length > 0; length--) {
+		data = ntohl(*ptr++);
+		for (shift = 28; shift >= 0; shift -= 4) {
+			sum = ((crc >> 12) ^ (data >> shift)) & 0x000f;
+			crc = (crc << 4) ^ (sum << 12) ^ (sum << 5) ^ sum;
+		}
+		crc &= 0xffff;
+	}
+	return crc;
+}

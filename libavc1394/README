@@ -12,6 +12,18 @@ can be controlled via AV/C. Eventually, the library will be expanded to
 implement more of the specification and to provide high level interfaces
 to various devices.
 
+	libavc1394 also includes librom1394 and libplug1394. Basically, 
+the libavc1394 project is turning into a collection of libraries 
+that use raw1394 to implement standards for metadata, management, and
+control. librom1394 provides the ability to read the Configuration ROM
+on devices. Soon it will permit the manipulation of ConfigROM images
+for the Linux 1394 host. The Configuration ROM is addressed in a number
+of standards and specifications build upon the foundational standard
+IEEE P1212. libplug1394 implements functions to read and change plug 
+control registers as well as giving you the ability to host plugs. It
+is based upon IEC 61883.
+
+
 2. Usage Information
 
     The library comes with a console utility called dvcont that lets you
