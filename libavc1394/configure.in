@@ -1,11 +1,14 @@
-AC_INIT(Makefile.am)
-
-AM_INIT_AUTOMAKE(libavc1394, 0.5.0)
+AC_PREREQ(2.52)
+AC_INIT(libavc1394, 0.5.0, http://sourceforge.net/projects/libavc1394/)
+AM_INIT_AUTOMAKE(AC_PACKAGE_NAME, AC_PACKAGE_VERSION)
 AM_CONFIG_HEADER(config.h)
+AM_MAINTAINER_MODE
 
 AC_PROG_CC
+AC_ISC_POSIX
 AC_PROG_LIBTOOL
 AM_PROG_LIBTOOL
+AC_PROG_INSTALL
 
 # Check for the new version of libraw1394 with improved error handling
 AC_CHECK_LIB(raw1394, raw1394_get_errcode,

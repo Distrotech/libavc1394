@@ -1,3 +1,9 @@
+2005-01-10  Dan Dennedy <dan@dennedy.org>
+	* libavc1394/avc1394.h: applied patch from Daniel Wagner
+	  <wagi@monom.org> to fix AVC1394_GET_RESPONSE_OPERAND and add
+	  constants for more subunit types and subunit_music capabilities.
+	* test/dvcont.1: added man page missing in CVS!
+	  
 2004-07-10  Dan Dennedy <dan@dennedy.org>
 	* libavc1394/avc1394_vcr.c: added avc1394_vcr_get_timecode2() that uses
 	  an out param.
