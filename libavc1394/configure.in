@@ -1,6 +1,6 @@
 AC_INIT(Makefile.am)
 
-AM_INIT_AUTOMAKE(libavc1394, 0.2.1)
+AM_INIT_AUTOMAKE(libavc1394, 0.2.2)
 AM_CONFIG_HEADER(config.h)
 
 AC_PROG_CC
@@ -19,7 +19,7 @@ AC_CHECK_HEADERS(sys/time.h sys/types.h unistd.h string.h netinet/in.h stdio.h)
 
 #set the libtool shared library version numbers
 lt_major=0
-lt_revision=1
+lt_revision=2
 lt_age=0
 
 AC_SUBST(lt_major)

@@ -40,6 +40,7 @@ int rom1394_get_bus_info_block_length(raw1394handle_t handle, nodeid_t node)
 	octlet_t 	offset;
 	int 		length;
 
+	NODECHECK(handle, node);
 	offset = CSR_REGISTER_BASE + CSR_CONFIG_ROM + ROM1394_HEADER;
 	QUADREADERR (handle, node, offset, &quadlet);
 	quadlet = htonl (quadlet);
@@ -54,6 +55,7 @@ quadlet_t rom1394_get_bus_id(raw1394handle_t handle, nodeid_t node)
 	quadlet_t 	quadlet;
 	octlet_t 	offset;
 
+	NODECHECK(handle, node);
 	offset = CSR_REGISTER_BASE + CSR_CONFIG_ROM + ROM1394_BUS_ID;
 	QUADREADERR (handle, node, offset, &quadlet);
 	quadlet = htonl (quadlet);
@@ -63,11 +65,12 @@ quadlet_t rom1394_get_bus_id(raw1394handle_t handle, nodeid_t node)
     return quadlet;
 }
 
-void rom1394_get_bus_options(raw1394handle_t handle, nodeid_t node, rom1394_bus_options* bus_options)
+int rom1394_get_bus_options(raw1394handle_t handle, nodeid_t node, rom1394_bus_options* bus_options)
 {
 	quadlet_t 	quadlet;
 	octlet_t 	offset;
 
+	NODECHECK(handle, node);
 	offset = CSR_REGISTER_BASE + CSR_CONFIG_ROM + ROM1394_BUS_OPTIONS;
 	QUADREADERR (handle, node, offset, &quadlet);
 	quadlet = htonl (quadlet);
@@ -78,6 +81,7 @@ void rom1394_get_bus_options(raw1394handle_t handle, nodeid_t node, rom1394_bus_
 	bus_options->cyc_clk_acc = (quadlet >> 16) & 0xFF;
 	bus_options->max_rec = (quadlet >> 12) & 0xF;
 	bus_options->max_rec = pow( 2, bus_options->max_rec+1);
+	return 0;
 }
 
 octlet_t rom1394_get_guid(raw1394handle_t handle, nodeid_t node)
@@ -86,6 +90,7 @@ octlet_t rom1394_get_guid(raw1394handle_t handle, nodeid_t node)
 	octlet_t 	offset;
 	octlet_t    guid = 0;
 
+	NODECHECK(handle, node);
 	offset = CSR_REGISTER_BASE + CSR_CONFIG_ROM + ROM1394_GUID_HI;
 	QUADREADERR (handle, node, offset, &quadlet);
 	quadlet = htonl (quadlet);
@@ -99,12 +104,18 @@ octlet_t rom1394_get_guid(raw1394handle_t handle, nodeid_t node)
     return guid;
 }
 
-void rom1394_get_directory(raw1394handle_t handle, nodeid_t node, rom1394_directory *dir)
+int rom1394_get_directory(raw1394handle_t handle, nodeid_t node, rom1394_directory *dir)
 {
 	octlet_t 	offset;
 	int i, j;
 	char *p;
 
+	NODECHECK(handle, node);
+    dir->node_capabilities = 0;
+    dir->vendor_id = 0;
+    dir->unit_spec_id = 0;
+    dir->unit_sw_version = 0;
+    dir->model_id = 0;
 	dir->max_textual_leafs = dir->nr_textual_leafs = 0;
 	dir->label = NULL;
 	dir->textual_leafs = NULL;
@@ -126,6 +137,7 @@ void rom1394_get_directory(raw1394handle_t handle, nodeid_t node, rom1394_direct
 		    }
 		}
 	}
+	return 0;
 }
 
 /* ----------------------------------------------------------------------------

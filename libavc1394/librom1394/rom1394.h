@@ -74,13 +74,13 @@ rom1394_get_bus_info_block_length(raw1394handle_t handle, nodeid_t node);
 quadlet_t
 rom1394_get_bus_id(raw1394handle_t handle, nodeid_t node);
 
-void
+int
 rom1394_get_bus_options(raw1394handle_t handle, nodeid_t node, rom1394_bus_options* bus_options);
 
 octlet_t
 rom1394_get_guid(raw1394handle_t handle, nodeid_t node);
 
-void
+int
 rom1394_get_directory(raw1394handle_t handle, nodeid_t node, rom1394_directory *dir);
 
 rom1394_node_types
