@@ -318,4 +318,3 @@ avc1394_vcr_seek_timecode(raw1394handle_t handle, nodeid_t node, char *timecode)
     
     avc1394_send_command_block( handle, node, request, 2);
 }
-

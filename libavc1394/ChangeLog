@@ -1,4 +1,7 @@
 
+2004-07-09  Dan Dennedy <dan@dennedy.org>
+	* libavc1394/avc1394_simple.c: fix retry parameter of transactions.
+
 2003-12-07  Dan Dennedy <dan@dennedy.org>
 	* libavc1394/avc1394.h: apply patch from Tim Coppefield to add more
 	  operands and to correct the size of a command response.
@@ -98,4 +101,3 @@
 2001-05-10  Dan Dennedy  <dan@dennedy.org>
 	* converted Andreas Mickleis' simplavc into a library
 	* converted Jason Howard's dvcont to use libavc1394 vcr interface
-

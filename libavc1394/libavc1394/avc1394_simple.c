@@ -121,15 +121,20 @@ quadlet_t avc1394_transaction(raw1394handle_t handle, nodeid_t node,
 #ifdef DEBUG
 		if (response != 0)
 			fprintf(stderr, "avc1394_transaction: Got AVC response 0x%0x (%s)\n", response, decode_response(response));
+		else
+			fprintf(stderr, "avc1394_transaction: no response\n");
 #endif
+		
+		if (response != 0) {
+			stop_avc_response_handler(handle);
+			return response;
+		}
 
-		stop_avc_response_handler(handle);
-		return (response == 0 ? -1 : response);
-    } while (--retry >= 0);
+	} while (--retry >= 0);
 
     stop_avc_response_handler(handle);
 
-    return -1;
+	return (response == 0 ? -1 : response);
 }
 
 /*
@@ -193,8 +198,10 @@ quadlet_t *avc1394_transaction_block(raw1394handle_t handle, nodeid_t node,
         }
 #endif
 		
-		stop_avc_response_handler(handle);
-		return response;
+		if (response != 0) {
+			stop_avc_response_handler(handle);
+			return response;
+		}
     } while (--retry >= 0);
 	
     stop_avc_response_handler(handle);
