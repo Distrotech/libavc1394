@@ -2,9 +2,10 @@
  * By: Jason Howard <jason@spectsoft.com>
  * http://www.spectsoft.com
  * Code Started January 1, 2001.
- * Version 0.04
+ * Version 0.1
  * Adapted to libavc1394 by Dan Dennedy <dan@dennedy.org>
  * Timeout handling added by Bevis King
+ * Many commands since 0.04 added by Dan Dennedy
  *
  * This code is based off a GNU project called gscanbus by Andreas Micklei
  * -- Thanks Andreas for the great code! --
@@ -46,7 +47,7 @@ int timeout=0;
 
 int i;
 
-#define version "Version 0.05"
+#define version "Version 0.1"
 
 
 void show_help() {
@@ -55,14 +56,20 @@ printf("\n--- DVCONT HELP ---");
 printf("\n\nUsage: dvcont <command>");
 printf("\n\nCommands:");
 printf("\nplay - Tell the camera to play (or toggle slow-mo)");
+printf("\nreverse - Tell the camera to play in reverse (or toggle reverse slow-mo)");
+printf("\ntrickplay - Tell the camera to play back at -14 to +14 (not supported by all cams)");
 printf("\nstop - Tell the camera to stop");
 printf("\nrewind - Tell the camera to rewind (stop or play mode)");
 printf("\nff - Tell the camera to fast forward (stop or play mode)");
 printf("\npause - Tell the camera to toggle pause play");
 printf("\nnext - Tell the camera to go to the next frame (pause mode)");
+printf("\nnextindex - Tell the camera to go to the next index point and pause");
 printf("\nprev - Tell the camera to go to the previous frame (pause mode)");
+printf("\nprevindex - Tell the camera to go to the previous index point and pause");
 printf("\nrecord - Tell the camera to record (use with caution!)");
 printf("\neject - Tell the camera to eject the tape (awe your friends!)");
+printf("\ntimecode - Report the timecode from the tape (HH:MM:SS:FF)");
+printf("\nstatus - Report the status of the device");
 printf("\nverbose - Tell the program to tell you debug info.");
 printf("\nversion - Tell the program to tell you the program version.");
 printf("\nhelp - Tell the program to show you this screen");
@@ -80,7 +87,9 @@ int main (int argc, char *argv[])
 	int device;
 	int retcode;
 	int verbose;
+	int speed;
 	struct sigaction act;
+	char *timecode;
 
 	// Declare some default values.
 	
@@ -145,9 +154,18 @@ int main (int argc, char *argv[])
 
 	for (i = 1; i < argc; ++i) {
         
-	  if (strcmp("play", argv[i]) == 0) {
+        if (strcmp("play", argv[i]) == 0) {
             avc1394_vcr_play(handle, device);
           
+	    } else if (strcmp("reverse", argv[i]) == 0) {
+            avc1394_vcr_reverse(handle, device);
+	    
+	    } else if (strcmp("trickplay", argv[i]) == 0) {
+	        if (i+1 < argc) {
+                speed = atoi(argv[(i+1)]);
+                avc1394_vcr_trick_play(handle, device, speed);
+            }
+	    
 	    } else if (strcmp("stop", argv[i]) == 0) {
             avc1394_vcr_stop(handle, device);
 	    
@@ -166,8 +184,17 @@ int main (int argc, char *argv[])
 	    } else if (strcmp("eject", argv[i]) == 0) {
 		avc1394_vcr_eject(handle, device);
 	    
+	    } else if (strcmp("status", argv[i]) == 0) {
+		printf( "%s\n", avc1394_vcr_decode_status(avc1394_vcr_status(handle, device)));
+	    
+	    } else if (strcmp("timecode", argv[i]) == 0) {
+	        if ( (timecode = avc1394_vcr_get_timecode(handle, device)) != NULL) {
+        		printf( "%s\n", timecode);
+        		free(timecode);
+    		}
+	    
 	    } else if (strcmp("version", argv[i]) == 0) {
-		printf("\nDV Camera Console Control Program\n%s\nBy: Jason Howard\n--- Many thanks to Andreas Micklei and\nthe rest of the linux1394 gang!\n\n", version);
+		printf("\nDV Camera Console Control Program\n%s\nBy: Jason Howard, Dan Dennedy, and Andreas Micklei\n", version);
 	    
 	    } else if (strcmp("verbose", argv[i]) == 0) {
 		printf("successfully got handle\n");
@@ -180,8 +207,14 @@ int main (int argc, char *argv[])
 	    }	else if (strcmp("next", argv[i]) == 0) {
 		avc1394_vcr_next(handle, device);
 	    
+	    }	else if (strcmp("nextindex", argv[i]) == 0) {
+		avc1394_vcr_next_index(handle, device);
+	    
 	    }	else if (strcmp("prev", argv[i]) == 0) {
 		avc1394_vcr_previous(handle, device);
+	    
+	    }	else if (strcmp("previndex", argv[i]) == 0) {
+		avc1394_vcr_previous_index(handle, device);
 	    
 	    }	else if (strcmp("help", argv[i]) == 0) {
 		show_help ();

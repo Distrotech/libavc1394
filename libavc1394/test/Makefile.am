@@ -1,5 +1,7 @@
 MAINTAINERCLEANFILES = Makefile.in
+EXTRA_DIST = dvcont.1
 bin_PROGRAMS = dvcont
+man_MANS = dvcont.1
 noinst_PROGRAMS = romtest
 dvcont_SOURCES = dvcont.c
 dvcont_LDADD = $(top_builddir)/libavc1394/libavc1394.la -lraw1394

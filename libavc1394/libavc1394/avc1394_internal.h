@@ -6,6 +6,8 @@
 #define FCP_RESPONSE_ADDR 0xFFFFF0000D00
 
 #define MAX_RESPONSE_SIZE 512
+#define AVC1394_RETRY 2
+
 void htonl_block(quadlet_t *buf, int len);
 void ntohl_block(quadlet_t *buf, int len);
 char *decode_response(quadlet_t response);

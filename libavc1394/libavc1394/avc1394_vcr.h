@@ -36,9 +36,20 @@ avc1394_vcr_is_playing(raw1394handle_t handle, nodeid_t node);
 int
 avc1394_vcr_is_recording(raw1394handle_t handle, nodeid_t node);
 
-/* ##### Tell the device to PLAY ##### */
+/* ##### Tell the device to PLAY FORWARD ##### */
+/* issue twice in a row to play forward at the slowest rate */
 void
 avc1394_vcr_play(raw1394handle_t handle, nodeid_t node);
+
+/* ##### Tell the device to PLAY in REVERSE ##### */
+/* issue twice in a row to play in reverse at the slowest rate */
+void
+avc1394_vcr_reverse(raw1394handle_t handle, nodeid_t node);
+
+/* ##### exercise the trick play modes! ##### */
+/* speed is a signed percentage value from -14 to +14 */
+void
+avc1394_vcr_trick_play(raw1394handle_t handle, nodeid_t node, int speed);
 
 /* ##### Tell the device to STOP ##### */
 void
@@ -60,9 +71,17 @@ avc1394_vcr_forward(raw1394handle_t handle, nodeid_t node);
 void
 avc1394_vcr_next(raw1394handle_t handle, nodeid_t node);
 
+/* ##### Tell the device goto NEXT index point ##### */
+void
+avc1394_vcr_next_index(raw1394handle_t handle, nodeid_t node);
+
 /* ##### Tell the device goto PREVIOUS frame ##### */
 void 
 avc1394_vcr_previous(raw1394handle_t handle, nodeid_t node);
+
+/* ##### Tell the device goto PREVIOUS index point ##### */
+void 
+avc1394_vcr_previous_index(raw1394handle_t handle, nodeid_t node);
 
 /* ##### Tell the device to EJECT (usually not supported) ##### */
 void 
@@ -77,7 +96,12 @@ quadlet_t
 avc1394_vcr_status(raw1394handle_t handle, nodeid_t node);
 
 /* Get a textual description of the status */
-char *avc1394_vcr_decode_status(quadlet_t response);
+char *
+avc1394_vcr_decode_status(quadlet_t response);
+
+/* Get the time code on tape in format HH:MM:SS:FF */
+char *
+avc1394_vcr_get_timecode(raw1394handle_t handle, nodeid_t node);
 
 #ifdef __cplusplus
 }

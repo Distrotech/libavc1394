@@ -196,7 +196,7 @@ int avc1394_open_descriptor(raw1394handle_t handle, nodeid_t node,
     if (ctype == AVC1394_CTYPE_STATUS)
         request[1] = 0xFF00FFFF;
 
-    response = avc1394_transaction_block(handle, node, request, 2, 3);
+    response = avc1394_transaction_block(handle, node, request, 2, AVC1394_RETRY);
     if (response == NULL)
         return -1;
 
@@ -231,7 +231,7 @@ int avc1394_close_descriptor(raw1394handle_t handle, nodeid_t node,
                  | *descriptor_identifier;
     request[1] = subfunction << 24;
 
-    response = avc1394_transaction_block(handle, node, request, 2, 3);
+    response = avc1394_transaction_block(handle, node, request, 2, AVC1394_RETRY);
     if (response == NULL)
         return -1;
 
@@ -259,7 +259,7 @@ unsigned char *avc1394_read_descriptor(raw1394handle_t handle, nodeid_t node,
     request[1] = 0xFF000000;	/* read entire descriptor */
     request[2] = 0x00000000;	/* beginning from 0x0000 */
 
-    response = avc1394_transaction_block(handle, node, request, 3, 3);
+    response = avc1394_transaction_block(handle, node, request, 3, AVC1394_RETRY);
     if (response == NULL)
         return NULL;
 
@@ -282,7 +282,7 @@ int avc1394_subunit_info(raw1394handle_t handle, nodeid_t node, quadlet_t *table
                      | AVC1394_SUBUNIT_ID_IGNORE | AVC1394_COMMAND_SUBUNIT_INFO
                      | page << 4 | EXTENSION_CODE;
         request[1] = 0xFFFFFFFF;
-        response = avc1394_transaction_block(handle, node, request, 2, 3);
+        response = avc1394_transaction_block(handle, node, request, 2, AVC1394_RETRY);
         if (response == NULL)
             return -1;
         table[page] = response[1];
@@ -302,7 +302,8 @@ int avc1394_check_subunit_type(raw1394handle_t handle, nodeid_t node, int subuni
     int entry;
     int id;
 
-    avc1394_subunit_info( handle, node, table);
+    if ( avc1394_subunit_info( handle, node, table) < 0) 
+        return 0;
     for (i=0; i<8; i++) {
         for (j=3; j>=0; j--) {
             entry = (table[i] >> (j * 8)) & 0xFF;
@@ -324,7 +325,7 @@ quadlet_t *avc1394_unit_info(raw1394handle_t handle, nodeid_t node)
     request[0] = AVC1394_CTYPE_STATUS | AVC1394_SUBUNIT_TYPE_UNIT
                  | AVC1394_SUBUNIT_ID_IGNORE | AVC1394_COMMAND_UNIT_INFO | 0xFF;
     request[1] = 0xFFFFFFFF;
-    response = avc1394_transaction_block(handle, node, request, 2, 3);
+    response = avc1394_transaction_block(handle, node, request, 2, AVC1394_RETRY);
     if (response == NULL)
         return NULL;
 

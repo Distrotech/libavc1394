@@ -1,3 +1,15 @@
+2001-08-15  Dan Dennedy <dan@dennedy.org>
+    * avc1394_simple.c: bug fix in avc1394_check_subunit_type() to handle
+      error return from call to avc1394_subunit_info(), set retry level =2
+    * avc1394.h: added more VCR playback speeds,
+      added enum for VCR measurement units
+    * avc1394_vcr.[ch]: added functions for timecode, reverse, trickplay,
+      index search; set retry level =2
+    * dvcont.c: now version 0.1, added commands timecode, reverse, nextindex,
+      previndex, trickplay, and status
+    * dvcont.1: added man page written by Daniel Kobras
+    * README: added usage information about dvcont.
+    
 2001-06-10  Dan Dennedy <dan@dennedy.org>
 	* bug fix in librom1394/rom1394_internal.c:proc_directory, a failed
 	  read on first quadlet could lead to an invalid directory length

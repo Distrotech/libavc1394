@@ -19,10 +19,13 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
+#include <unistd.h>
+#include <stdio.h>
+#include <stdlib.h>
 #include "avc1394_vcr.h"
 #include "avc1394.h"
 
-#define AVC1394_RETRY 4
+#define AVC1394_RETRY 2
 
 #define CTLVCR0 AVC1394_CTYPE_CONTROL | AVC1394_SUBUNIT_TYPE_TAPE_RECORDER | AVC1394_SUBUNIT_ID_0
 #define STATVCR0 AVC1394_CTYPE_STATUS | AVC1394_SUBUNIT_TYPE_TAPE_RECORDER | AVC1394_SUBUNIT_ID_0
@@ -68,6 +71,37 @@ void avc1394_vcr_play(raw1394handle_t handle, nodeid_t node)
 	} else {
 		avc1394_send_command(handle, node, CTLVCR0
 			| AVC1394_VCR_COMMAND_PLAY | AVC1394_VCR_OPERAND_PLAY_FORWARD);
+	}
+}
+
+
+void avc1394_vcr_reverse(raw1394handle_t handle, nodeid_t node)
+{
+	if (avc1394_vcr_is_playing(handle, node) == AVC1394_VCR_OPERAND_PLAY_REVERSE) {
+		avc1394_send_command(handle, node, CTLVCR0
+			| AVC1394_VCR_COMMAND_PLAY | AVC1394_VCR_OPERAND_PLAY_SLOWEST_REVERSE);
+	} else {
+		avc1394_send_command(handle, node, CTLVCR0
+			| AVC1394_VCR_COMMAND_PLAY | AVC1394_VCR_OPERAND_PLAY_REVERSE);
+	}
+}
+
+
+void avc1394_vcr_trick_play(raw1394handle_t handle, nodeid_t node, int speed)
+{
+	if (!avc1394_vcr_is_recording(handle, node)) {
+	    if (speed == 0) {
+		    avc1394_send_command(handle, node, CTLVCR0
+			    | AVC1394_VCR_COMMAND_PLAY | AVC1394_VCR_OPERAND_PLAY_FORWARD);
+	    } else if (speed > 0) {
+	        if (speed > 14) speed = 14;
+		    avc1394_send_command(handle, node, CTLVCR0
+			    | AVC1394_VCR_COMMAND_PLAY | (AVC1394_VCR_OPERAND_PLAY_NEXT_FRAME + speed));	        
+	    } else {
+	        if (speed < -14) speed = -14;
+		    avc1394_send_command(handle, node, CTLVCR0
+			    | AVC1394_VCR_COMMAND_PLAY | (AVC1394_VCR_OPERAND_PLAY_PREVIOUS_FRAME - speed));	        
+	    }
 	}
 }
 
@@ -140,12 +174,33 @@ void avc1394_vcr_next(raw1394handle_t handle, nodeid_t node)
 	} 
 }
 
+void avc1394_vcr_next_index(raw1394handle_t handle, nodeid_t node)
+{
+    quadlet_t request[2];
+	if (avc1394_vcr_is_playing(handle, node)) {
+	    request[0] = CTLVCR0 | AVC1394_VCR_COMMAND_FORWARD | 
+	        AVC1394_VCR_MEASUREMENT_INDEX;
+	    request[1] = 0x01FFFFFF;
+		avc1394_send_command_block(handle, node, request, 2);
+	} 
+}
 
 void avc1394_vcr_previous(raw1394handle_t handle, nodeid_t node)
 {
 	if (avc1394_vcr_is_playing(handle, node)) {
 		avc1394_send_command(handle, node, CTLVCR0
 			| AVC1394_VCR_COMMAND_PLAY | AVC1394_VCR_OPERAND_PLAY_PREVIOUS_FRAME);
+	} 
+}
+
+void avc1394_vcr_previous_index(raw1394handle_t handle, nodeid_t node)
+{
+    quadlet_t request[2];
+	if (avc1394_vcr_is_playing(handle, node)) {
+	    request[0] = CTLVCR0 | AVC1394_VCR_COMMAND_BACKWARD | 
+	        AVC1394_VCR_MEASUREMENT_INDEX;
+	    request[1] = 0x01FFFFFF;
+		avc1394_send_command_block(handle, node, request, 2);
 	} 
 }
 
@@ -213,4 +268,28 @@ char *avc1394_vcr_decode_status(quadlet_t response)
     }
 }
 
+/* Get the time code on tape in format HH:MM:SS:FF */
+char *
+avc1394_vcr_get_timecode(raw1394handle_t handle, nodeid_t node)
+{
+    quadlet_t  request[2];
+    quadlet_t *response;
+    char      *output = NULL;
+        
+    request[0] = STATVCR0 | AVC1394_VCR_COMMAND_TIME_CODE | 
+        AVC1394_VCR_OPERAND_TIME_CODE_STATUS;
+    request[1] = 0xFFFFFFFF;
+    response = avc1394_transaction_block( handle, node, request, 2, AVC1394_RETRY);
+    if (response == NULL) return NULL;
+
+    output = malloc(12);    
+    // consumer timecode format
+    sprintf(output, "%2.2x:%2.2x:%2.2x:%2.2x",
+        response[1] & 0x000000ff,
+        (response[1] >> 8) & 0x000000ff,
+        (response[1] >> 16) & 0x000000ff,
+        (response[1] >> 24) & 0x000000ff);
+    
+    return output;
+}
 
