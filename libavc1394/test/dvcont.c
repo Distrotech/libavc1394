@@ -63,6 +63,7 @@ printf("\neject - Tell the camera to eject the tape (awe your friends!)");
 printf("\ntimecode - Report the timecode from the tape (HH:MM:SS:FF)");
 printf("\nseek - Tell the camera to go to the <timecode> (HH:MM:SS:FF)");
 printf("\nstatus - Report the status of the device");
+printf("\npluginfo - Report available plugs");
 printf("\nverbose - Tell the program to tell you debug info.");
 printf("\nversion - Tell the program to tell you the program version.");
 printf("\nhelp - Tell the program to show you this screen");

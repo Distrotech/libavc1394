@@ -42,6 +42,7 @@
 #include <sys/types.h>
 #include <sys/poll.h>
 #include <unistd.h>
+#include <time.h>
 
 #include <string.h>
 #include <netinet/in.h>
@@ -90,8 +91,9 @@ quadlet_t avc1394_transaction(raw1394handle_t handle, nodeid_t node,
 
     do {
         if (avc1394_send_command(handle, node, quadlet) < 0) {
+			struct timespec ts = {0, AVC1394_SLEEP};
             fprintf(stderr,"send oops\n");
-            usleep(AVC1394_SLEEP);
+            nanosleep(&ts, NULL);
             continue;
         }
 
@@ -119,12 +121,8 @@ quadlet_t avc1394_transaction(raw1394handle_t handle, nodeid_t node,
 			fprintf(stderr, "avc1394_transaction: Got AVC response 0x%0x (%s)\n", response, decode_response(response));
 #endif
 
-        if (response != 0 && 
-			(AVC1394_MASK_RESPONSE(response) == AVC1394_RESPONSE_STABLE))
-		{
-			stop_avc_response_handler(handle);
-			return response;
-		}
+		stop_avc_response_handler(handle);
+		return (response == 0 ? -1 : response);
     } while (--retry >= 0);
 
     stop_avc_response_handler(handle);
@@ -156,9 +154,9 @@ quadlet_t *avc1394_transaction_block(raw1394handle_t handle, nodeid_t node,
 
     do {
         if (avc1394_send_command_block(handle, node, buf, len) < 0) {
+			struct timespec ts = {0, AVC1394_SLEEP};
             fprintf(stderr,"send oops\n");
-            usleep(AVC1394_SLEEP);
-            continue;
+            nanosleep(&ts, NULL);
         }
 
         if ( poll( &raw1394_poll, 1, 50) > 0 ) {
@@ -192,12 +190,8 @@ quadlet_t *avc1394_transaction_block(raw1394handle_t handle, nodeid_t node,
         }
 #endif
 		
-		if (response != NULL &&
-			(AVC1394_MASK_RESPONSE(response[0]) == AVC1394_RESPONSE_STABLE))
-		{
-			stop_avc_response_handler(handle);
-			return response;
-		}
+		stop_avc_response_handler(handle);
+		return response;
     } while (--retry >= 0);
 	
     stop_avc_response_handler(handle);
