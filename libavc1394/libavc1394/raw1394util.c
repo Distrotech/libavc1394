@@ -14,6 +14,8 @@ int cooked1394_read(raw1394handle_t handle, nodeid_t node, nodeaddr_t addr,
             usleep(RETRY_DELAY);
         else
             return retval;
+    }
+    return -1;
 #else
         if( retval < 0 ) return retval;
         ackcode = RAW1394_MASK_ACK(retval);
@@ -24,12 +26,8 @@ int cooked1394_read(raw1394handle_t handle, nodeid_t node, nodeaddr_t addr,
         } else {
             break;
         }
-#endif
     }
 
-#ifdef RAW1394_V_0_9
-    return -1;
-#else
     if( ackcode != ACK_PENDING && ackcode != ACK_COMPLETE &&
             ackcode != ACK_LOCAL)
         return -1;
@@ -48,6 +46,8 @@ int cooked1394_write(raw1394handle_t handle, nodeid_t node, nodeaddr_t addr,
             usleep(RETRY_DELAY);
         else
             return retval;
+    }
+    return -1;
 #else
         if(retval < 0 )
             return retval;
@@ -59,12 +59,8 @@ int cooked1394_write(raw1394handle_t handle, nodeid_t node, nodeaddr_t addr,
         } else {
             break;
         }
-#endif
     }
 
-#ifdef RAW1394_V_0_9
-    return -1;
-#else
     if( ackcode != ACK_PENDING && ackcode != ACK_COMPLETE &&
             ackcode != ACK_LOCAL)
         return -1;
