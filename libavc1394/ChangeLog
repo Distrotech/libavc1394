@@ -1,10 +1,11 @@
-2002-10-01  Dan Dennedy <dan@dennedy.org?
+2002-10-01  Dan Dennedy <dan@dennedy.org>
 	* common/raw1394util.c: convert from usleep to nanosleep
 	
 2002-09-26  Dan Dennedy <dan@dennedy.org>
 	* avc1394_simple.c: remove test for STABLE response from avc transactions.
 	* avc1394_simple.c: convert usleep to nanosleep.
 	* dvcont.1, dvcont.c: apply patch from Daniel Kobras for updated docs.
+	* dvcont.c: fix include
 
 2002-09-25  Dan Dennedy <dan@dennedy.org>
 	* avc1394_simple.c: added timeout support to avc transactions.
