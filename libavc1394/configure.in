@@ -1,6 +1,5 @@
-AC_PREREQ(2.52)
-AC_INIT(libavc1394, 0.5.0, http://sourceforge.net/projects/libavc1394/)
-AM_INIT_AUTOMAKE(AC_PACKAGE_NAME, AC_PACKAGE_VERSION)
+AC_INIT(Makefile.am)
+AM_INIT_AUTOMAKE(libavc1394, 0.5.0)
 AM_CONFIG_HEADER(config.h)
 AM_MAINTAINER_MODE
 
@@ -10,15 +9,9 @@ AC_PROG_LIBTOOL
 AM_PROG_LIBTOOL
 AC_PROG_INSTALL
 
-# Check for the new version of libraw1394 with improved error handling
-AC_CHECK_LIB(raw1394, raw1394_get_errcode,
-             AC_DEFINE(RAW1394_V_0_9),
-             AC_CHECK_LIB(raw1394, raw1394_reset_bus,
-                          AC_DEFINE(RAW1394_V_0_8),
-                          AC_MSG_ERROR(Please upgrade libraw1394 to version 0.8 or newer.)))
-
 AC_HEADER_STDC
 AC_CHECK_HEADERS(sys/time.h sys/types.h unistd.h string.h netinet/in.h stdio.h)
+PKG_CHECK_MODULES(LIBRAW1394, libraw1394 >= 1.0.0)
 
 #set the libtool shared library version numbers
 lt_major=2
@@ -31,17 +24,10 @@ AC_SUBST(lt_age)
 
 CFLAGS="$CFLAGS -Wall -Wunused"
 
-# what were these for
-#Xsed="sed -e s/^X//"
-#LTLIBOBJS=`echo X"$LIBOBJS"|\
-#           [$Xsed -e "s,\.[^.]* ,.lo ,g;s,\.[^.]*$,.lo,"]`
-#AC_SUBST(LTLIBOBJS)
-
 AC_OUTPUT([
 Makefile 
 common/Makefile 
 libavc1394/Makefile 
 librom1394/Makefile 
-libplug1394/Makefile 
 test/Makefile
 ])

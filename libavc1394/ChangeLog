@@ -1,3 +1,9 @@
+2005-01-25  Dan Dennedy <dan@dennedy.org>
+	* convert build to use pkg-config for libraw1394
+	* common/raw1394util.c: remove support for libraw1394 0.8
+	* remove libplug1394 and test/plugreport and test/plugctl
+	  (these are now available in libiec61883)
+
 2005-01-10  Dan Dennedy <dan@dennedy.org>
 	* libavc1394/avc1394.h: applied patch from Daniel Wagner
 	  <wagi@monom.org> to fix AVC1394_GET_RESPONSE_OPERAND and add
