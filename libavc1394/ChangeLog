@@ -6,6 +6,7 @@
 	  commands entered, added hidden pluginfo command for playing around,
 	  added more verbose output.
 	* configure.in: bump version.
+	* dvcont.c: fixup version numbers.
 
 2002-04-04  Dan Dennedy <dan@dennedy.org>
     * Applied patch from Kirk Bateman to handle unicode US_ENGLISH

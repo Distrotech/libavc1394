@@ -2,7 +2,7 @@
  * By: Jason Howard <jason@spectsoft.com>
  * http://www.spectsoft.com
  * Code Started January 1, 2001.
- * Version 0.2
+ * Version 0.4
  * Adapted to libavc1394 by Dan Dennedy <dan@dennedy.org>
  * Many commands since 0.04 added by Dan Dennedy
  *
@@ -40,7 +40,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define version "Version 0.3"
+#define version "Version 0.4"
 
 void show_help() {
 
