@@ -81,7 +81,7 @@ int main (int argc, char *argv[])
 	int verbose = 0;
     int i, j;
 	int speed;
-	char *timecode;
+	char timecode[12];
 
 	if (argc < 2)
 	{
@@ -185,10 +185,10 @@ int main (int argc, char *argv[])
     		printf( "%s\n", avc1394_vcr_decode_status(avc1394_vcr_status(handle, device)));
 	    
 	    } else if (strcmp("timecode", argv[i]) == 0) {
-	        if ( (timecode = avc1394_vcr_get_timecode(handle, device)) != NULL) {
+	        if (avc1394_vcr_get_timecode2(handle, device, timecode) == 0)
         		printf( "%s\n", timecode);
-        		free(timecode);
-    		}
+			else
+				printf( "--:--:--:--\n");
 	    
 	    } else if (strcmp("seek", argv[i]) == 0) {
 	        avc1394_vcr_seek_timecode(handle, device, argv[i+1]);
@@ -250,4 +250,3 @@ int main (int argc, char *argv[])
     raw1394_destroy_handle(handle);
 	return 0;
 }
-

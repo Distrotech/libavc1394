@@ -42,4 +42,3 @@ librom1394/Makefile
 libplug1394/Makefile 
 test/Makefile
 ])
-

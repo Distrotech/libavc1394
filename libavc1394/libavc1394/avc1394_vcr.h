@@ -100,8 +100,14 @@ char *
 avc1394_vcr_decode_status(quadlet_t response);
 
 /* Get the time code on tape in format HH:MM:SS:FF */
+/* This version allocates memory for the string, and 
+   the caller is required to free it. */
 char *
 avc1394_vcr_get_timecode(raw1394handle_t handle, nodeid_t node);
+/* This version requires a pre-allocated output string of at least 12 
+   characters. */
+int
+avc1394_vcr_get_timecode2(raw1394handle_t handle, nodeid_t node, char *output);
 
 /* Go to the time code on tape in format HH:MM:SS:FF */
 void
@@ -112,4 +118,3 @@ avc1394_vcr_seek_timecode(raw1394handle_t handle, nodeid_t node, char *timecode)
 #endif
 
 #endif
-
