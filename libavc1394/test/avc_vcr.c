@@ -33,8 +33,6 @@
 #include <libraw1394/csr.h>
 #include "../libavc1394/avc1394.h"
 
-#define DEBUG
-
 const char not_compatible[] = "\n"
 	"This libraw1394 does not work with your version of Linux. You need a different\n"
 	"version that matches your kernel (see kernel help text for the raw1394 option to\n"

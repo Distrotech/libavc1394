@@ -20,8 +20,8 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
  
-#ifndef ROM1394_H
-#define ROM1394_H
+#ifndef PLUG1394_H
+#define PLUG1394_H
 
 #include <stdint.h>
 #include <libraw1394/raw1394.h>
@@ -181,6 +181,7 @@ plug1394_set(raw1394handle_t h, nodeid_t n, nodeaddr_t a, quadlet_t value);
 #define plug1394_set_oPCR2(h,n,v) plug1394_set(h, n, CSR_O_PCR_2, *((quadlet_t *) &v))
 #define plug1394_get_oPCR3(h,n,v) plug1394_get(h, n, CSR_O_PCR_3, (quadlet_t *) v)
 #define plug1394_set_oPCR3(h,n,v) plug1394_set(h, n, CSR_O_PCR_3, *((quadlet_t *) &v))
+#define plug1394_get_oPCRX(h,n,v,x) plug1394_get(h, n, CSR_O_PCR_0+(4*x), (quadlet_t *) v)
 
 #define plug1394_get_iMPR(h,n,v) plug1394_get(h, n, CSR_I_MPR, (quadlet_t *) v)
 #define plug1394_set_iMPR(h,n,v) plug1394_set(h, n, CSR_I_MPR, *((quadlet_t *) &v))
@@ -193,6 +194,7 @@ plug1394_set(raw1394handle_t h, nodeid_t n, nodeaddr_t a, quadlet_t value);
 #define plug1394_set_iPCR2(h,n,v) plug1394_set(h, n, CSR_I_PCR_2, *((quadlet_t *) &v))
 #define plug1394_get_iPCR3(h,n,v) plug1394_get(h, n, CSR_I_PCR_3, (quadlet_t *) v)
 #define plug1394_set_iPCR3(h,n,v) plug1394_set(h, n, CSR_I_PCR_3, *((quadlet_t *) &v))
+#define plug1394_get_iPCRX(h,n,v,x) plug1394_get(h, n, CSR_I_PCR_0+(4*x), (quadlet_t *) v)
 
 
 /**************************************************************************

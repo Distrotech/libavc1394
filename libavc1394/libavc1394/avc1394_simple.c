@@ -159,6 +159,7 @@ quadlet_t *avc1394_transaction_block(raw1394handle_t handle, nodeid_t node,
 			struct timespec ts = {0, AVC1394_SLEEP};
             fprintf(stderr,"send oops\n");
             nanosleep(&ts, NULL);
+			continue;
         }
 
         if ( poll( &raw1394_poll, 1, AVC1394_POLL_TIMEOUT) > 0 ) {

@@ -66,8 +66,10 @@ char *decode_response(quadlet_t response)
 int avc_fcp_handler(raw1394handle_t handle, nodeid_t nodeid, int response,
                     size_t length, unsigned char *data)
 {
-    if (response) {
-        memcpy(g_fcp_response, data, length);
+    if ( response && length > 3 )
+	{
+		if ( *((quadlet_t*)data) != 0 ) 
+			memcpy(g_fcp_response, data, length);
     }
 
     return 0;
