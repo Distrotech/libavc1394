@@ -1,10 +1,6 @@
 libavc1394 TODO list:
 
-* adapt raw1394util.c to new v0.9 libraw1394 API
 * add DEBUG output
-* make dvcont determine first numerically sequential node
-  that is VCR subunit and use it if no dev specified.
-* change avc1394_is_subunit_recorder() to a more generic
-  avc1394_check_subunit()
+* convert most #define constants to enumerated types to do range-checking error trapping
 * add Jason's timecode-based operations to the vcr interface
 

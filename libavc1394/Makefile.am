@@ -1,5 +1,5 @@
-SUBDIRS = src test
-MAINTAINERCLEANFILES = Makefile.in aclocal.m4 configure config-h.in \
+SUBDIRS = libavc1394 test
+MAINTAINERCLEANFILES = Makefile.in aclocal.m4 configure config.h.in \
 	stamp-h.in
 install-exec-hook:
 	@if [ ! -c /dev/raw1394 ]; then \

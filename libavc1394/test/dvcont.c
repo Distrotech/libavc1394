@@ -28,6 +28,8 @@
  */
 
 // Load up the needed includes.
+#include <config.h>
+#include <libavc1394/avc1394.h>
 #include <libavc1394/avc1394_vcr.h>
 #include <libraw1394/raw1394.h>
 #include <libraw1394/csr.h>
@@ -78,9 +80,11 @@ int main (int argc, char *argv[])
 	
 	device = 1;
 	verbose = 0;
-
+#ifdef RAW1394_V_0_8
 	handle = raw1394_get_handle();
-
+#else
+    handle = raw1394_new_handle();
+#endif
         if (!handle) {
                 if (!errno) {
                         printf("Not Compatable!\n");
@@ -103,6 +107,12 @@ int main (int argc, char *argv[])
 		(quadlet_t *) &quadlet) < 0) {
 		fprintf(stderr,"something is wrong here\n");
 	}
+
+    for (i=0; i < raw1394_get_nodecount(handle); ++i)
+        if ( avc1394_check_subunit_type(handle, i, AVC1394_SUBUNIT_TYPE_VCR) ) {
+            device = i;
+            break;
+        }
 
 	for (i = 1; i < argc; ++i) {
         
