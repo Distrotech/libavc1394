@@ -30,7 +30,7 @@ const char not_loaded[] =
 int main(int argc, char **argv)
 {
 	raw1394handle_t handle;
-	int retval, i;
+	int retval;
 	quadlet_t rom[0x100];
 	size_t rom_size;
 	unsigned char rom_version;
