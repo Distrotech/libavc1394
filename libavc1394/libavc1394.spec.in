@@ -94,6 +94,7 @@ rm -rf %{buildroot}
 %{_libdir}/librom1394.so.0
 %{_libdir}/librom1394.so.0.1.1
 %attr(0755,root,root) %{_bindir}/dvcont
+%attr(0755,root,root) %{_bindir}/mkrfc2734
 %{_mandir}/man1/*.gz
 
 %files -n libavc1394-devel
@@ -115,6 +116,7 @@ rm -rf %{buildroot}
 %changelog
 * Thu Feb 17 2005 Dan Dennedy <dan@dennedy.org>
 - added pkg-config file
+- added mkrfc2734 binary
 
 * Fri May 21 2004 Steven Boswell <ulatec@users.sourceforge.net>
 - initial spec

@@ -1,5 +1,6 @@
 2005-02-17  Dan Dennedy <dan@dennedy.org>
 	* added spec and pkg-config support files
+	* added tests/mkrfc2734.1 man page
 
 2005-01-25  Dan Dennedy <dan@dennedy.org>
 	* convert build to use pkg-config for libraw1394

@@ -1,6 +1,6 @@
 MAINTAINERCLEANFILES = Makefile.in
 bin_PROGRAMS = dvcont mkrfc2734
-man_MANS = dvcont.1
+man_MANS = dvcont.1 mkrfc2734.1
 EXTRA_DIST = $(man_MANS)
 
 noinst_PROGRAMS = romtest setrom avc_vcr 
