@@ -8,7 +8,7 @@
 #define MAX_RESPONSE_SIZE 512
 #define AVC1394_RETRY 2
 #define AVC1394_SLEEP 10000
-#define AVC1394_POLL_TIMEOUT 100
+#define AVC1394_POLL_TIMEOUT 200
 /* #define DEBUG */
 
 void htonl_block(quadlet_t *buf, int len);
