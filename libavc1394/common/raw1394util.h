@@ -1,3 +1,5 @@
+#ifndef RAW1394UTIL_H
+#define RAW1394UTIL_H 1
 
 #include <libraw1394/raw1394.h>
 #include <libraw1394/csr.h>
@@ -45,4 +47,4 @@ cooked1394_write(raw1394handle_t handle, nodeid_t node, nodeaddr_t addr,
 #ifdef __cplusplus
 }
 #endif
-
+#endif

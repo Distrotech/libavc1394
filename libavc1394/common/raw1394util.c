@@ -6,7 +6,10 @@
 int cooked1394_read(raw1394handle_t handle, nodeid_t node, nodeaddr_t addr,
                     size_t length, quadlet_t *buffer)
 {
-    int retval, ackcode, rcode, i;
+    int retval, i;
+#ifdef RAW1394_V_0_8
+    int ackcode, rcode;
+#endif
     for(i=0; i<MAXTRIES; i++) {
         retval = raw1394_read(handle, node, addr, length, buffer);
 #ifdef RAW1394_V_0_9
@@ -38,7 +41,10 @@ int cooked1394_read(raw1394handle_t handle, nodeid_t node, nodeaddr_t addr,
 int cooked1394_write(raw1394handle_t handle, nodeid_t node, nodeaddr_t addr,
                      size_t length, quadlet_t *data)
 {
-    int retval, ackcode, rcode, i;
+    int retval, i;
+#ifdef RAW1394_V_0_8
+    int ackcode, rcode;
+#endif
     for(i=0; i<MAXTRIES; i++) {
         retval = raw1394_write(handle, node, addr, length, data);
 #ifdef RAW1394_V_0_9
