@@ -1,0 +1,4 @@
+2001-05-10  Dan Dennedy  <dan@dennedy.org>
+	* converted Andreas Mickleis' simplavc into a library
+	* converted Jason Howard's dvcont to use libavc1394 vcr interface
+
