@@ -29,7 +29,7 @@
 
 // Load up the needed includes.
 #include <config.h>
-#include <libavc1394/rom1394.h>
+#include <librom1394/rom1394.h>
 #include <libavc1394/avc1394.h>
 #include <libavc1394/avc1394_vcr.h>
 #include <libraw1394/raw1394.h>

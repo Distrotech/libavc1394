@@ -97,7 +97,7 @@ quadlet_t avc1394_transaction(raw1394handle_t handle, nodeid_t node,
             continue;
         }
 
-        if ( poll( &raw1394_poll, 1, 50) > 0 ) {
+        if ( poll( &raw1394_poll, 1, AVC1394_POLL_TIMEOUT) > 0 ) {
             if (raw1394_poll.revents & POLLIN) {
 				raw1394_loop_iterate(handle);
 				response = ntohl(*((quadlet_t *)g_fcp_response));
@@ -108,7 +108,7 @@ quadlet_t avc1394_transaction(raw1394handle_t handle, nodeid_t node,
 #ifdef DEBUG
 				fprintf(stderr,"INTERIM\n");
 #endif
-				if ( poll( &raw1394_poll, 1, 50) > 0 ) {
+				if ( poll( &raw1394_poll, 1, AVC1394_POLL_TIMEOUT) > 0 ) {
 					if (raw1394_poll.revents & POLLIN) {
 						raw1394_loop_iterate(handle);
 						response = ntohl(*((quadlet_t *)g_fcp_response));
@@ -159,7 +159,7 @@ quadlet_t *avc1394_transaction_block(raw1394handle_t handle, nodeid_t node,
             nanosleep(&ts, NULL);
         }
 
-        if ( poll( &raw1394_poll, 1, 50) > 0 ) {
+        if ( poll( &raw1394_poll, 1, AVC1394_POLL_TIMEOUT) > 0 ) {
             if (raw1394_poll.revents & POLLIN) {
 				raw1394_loop_iterate(handle);
 				response = (quadlet_t *)g_fcp_response;
@@ -171,7 +171,7 @@ quadlet_t *avc1394_transaction_block(raw1394handle_t handle, nodeid_t node,
 #ifdef DEBUG
 				fprintf(stderr,"INTERIM\n");
 #endif
-				if ( poll( &raw1394_poll, 1, 50) > 0 ) {
+				if ( poll( &raw1394_poll, 1, AVC1394_POLL_TIMEOUT) > 0 ) {
 					if (raw1394_poll.revents & POLLIN) {
 						raw1394_loop_iterate(handle);
 						response = (quadlet_t *)g_fcp_response;
