@@ -25,6 +25,7 @@
 #include <string.h>
 
 unsigned char g_fcp_response[MAX_RESPONSE_SIZE];
+unsigned int g_fcp_response_length;
 
 void htonl_block(quadlet_t *buf, int len)
 {
@@ -67,9 +68,12 @@ int avc_fcp_handler(raw1394handle_t handle, nodeid_t nodeid, int response,
                     size_t length, unsigned char *data)
 {
     if ( response && length > 3 )
-	{
-		if ( *((quadlet_t*)data) != 0 ) 
-			memcpy(g_fcp_response, data, length);
+    {
+        if ( *((quadlet_t*)data) != 0 )
+            g_fcp_response_length = (length + sizeof(quadlet_t) - 1) / sizeof(quadlet_t);
+        else
+            g_fcp_response_length = 0;
+        memcpy(g_fcp_response, data, length);
     }
 
     return 0;

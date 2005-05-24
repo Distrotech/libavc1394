@@ -50,6 +50,7 @@
 #include <stdio.h>	//DEBUG
 
 extern unsigned char g_fcp_response[];
+extern unsigned int g_fcp_response_length;
 
 int avc1394_send_command(raw1394handle_t handle, nodeid_t node, quadlet_t command)
 {
@@ -171,7 +172,7 @@ quadlet_t *avc1394_transaction_block(raw1394handle_t handle, nodeid_t node,
             if (raw1394_poll.revents & POLLIN) {
 				raw1394_loop_iterate(handle);
 				response = (quadlet_t *)g_fcp_response;
-				ntohl_block(response, len);
+				ntohl_block(response, g_fcp_response_length);
 			}
 		}
 		if (response != NULL) {
@@ -183,7 +184,7 @@ quadlet_t *avc1394_transaction_block(raw1394handle_t handle, nodeid_t node,
 					if (raw1394_poll.revents & POLLIN) {
 						raw1394_loop_iterate(handle);
 						response = (quadlet_t *)g_fcp_response;
-						ntohl_block(response, len);
+						ntohl_block(response, g_fcp_response_length);
 					}
 				}
 			}
