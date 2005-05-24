@@ -1,3 +1,7 @@
+2005-05-24 Dan Dennedy <dan@dennedy.org>
+	* avc1394_simple.c, avc1394_internal.c: apply patch from Pieter Palmers to 
+	fix incorrect fcp response length handling and subsequent endian conversion.
+
 2005-02-17  Dan Dennedy <dan@dennedy.org>
 	* added spec and pkg-config support files
 	* added tests/mkrfc2734.1 man page
