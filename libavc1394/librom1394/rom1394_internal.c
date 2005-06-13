@@ -131,63 +131,63 @@ int proc_directory (raw1394handle_t handle, nodeid_t node, octlet_t offset,
 	int		length, i, key, value;
 	quadlet_t 	quadlet;
 	octlet_t	subdir, selfdir;
-
+	
 	selfdir = offset;
-
-    QUADREADERR(handle, node, offset, &quadlet);
-    if (cooked1394_read(handle, (nodeid_t) 0xffc0 | node, offset, sizeof(quadlet_t), &quadlet) < 0) {
-        return -1;
-    } else {
-        quadlet = htonl(quadlet);
-    	length = quadlet>>16;
-    
-        DEBUG(node, "directory has %d entries\n", length);
-    	for (i=0; i<length; i++) {
-    		QUADINC(offset);
-    		QUADREADERR(handle, node, offset, &quadlet);
-    		quadlet = htonl(quadlet);
-    		key = quadlet>>24;
-    		value = quadlet&0x00FFFFFF;
-            DEBUG(node, "key/value: %08x/%08x\n", key, value);
-    		switch (key) {
-    			case 0x0C:
-    				dir->node_capabilities = value;
-    				break;
-    			case 0x03:
-    				dir->vendor_id = value;
-    				break;
-    			case 0x12:
-    				dir->unit_spec_id = value;
-    				break;
-    			case 0x13:
-    				dir->unit_sw_version = value;
-    				break;
-    			case 0x17:
-    				dir->model_id = value;
-    				break;
-    			case 0x81: // ASCII textual leaf offset
-    			case 0x82:
+	
+	QUADREADERR(handle, node, offset, &quadlet);
+	if (cooked1394_read(handle, (nodeid_t) 0xffc0 | node, offset, sizeof(quadlet_t), &quadlet) < 0) {
+		return -1;
+	} else {
+		quadlet = htonl(quadlet);
+		length = quadlet>>16;
+	
+		DEBUG(node, "directory has %d entries\n", length);
+		for (i=0; i<length; i++) {
+			QUADINC(offset);
+			QUADREADERR(handle, node, offset, &quadlet);
+			quadlet = htonl(quadlet);
+			key = quadlet>>24;
+			value = quadlet&0x00FFFFFF;
+			DEBUG(node, "key/value: %08x/%08x\n", key, value);
+			switch (key) {
+				case 0x0C:
+					dir->node_capabilities = value;
+					break;
+				case 0x03:
+					dir->vendor_id = value;
+					break;
+				case 0x12:
+					dir->unit_spec_id = value;
+					break;
+				case 0x13:
+					dir->unit_sw_version = value;
+					break;
+				case 0x17:
+					dir->model_id = value;
+					break;
+				case 0x81: // ASCII textual leaf offset
+				case 0x82:
 					if (value != 0)
 						read_textual_leaf( handle, node, offset + value * 4, dir);
-    				break;
+					break;
 				case 0xC1: // Descriptor directory
-    			case 0xC3: // vendor directory
-    			case 0xC7: // Module directory
-    			case 0xD1: // Unit directory
-    			case 0xD4:
-    			case 0xD8:
-    				subdir = offset + value*4;
-    				if (subdir > selfdir) {
-    					if ( proc_directory( handle, node, subdir, dir) < 0 )
+				case 0xC3: // vendor directory
+				case 0xC7: // Module directory
+				case 0xD1: // Unit directory
+				case 0xD4:
+				case 0xD8:
+					subdir = offset + value*4;
+					if (subdir > selfdir) {
+						if ( proc_directory( handle, node, subdir, dir) < 0 )
 							FAIL(node, "failed to read sub directory" );
-    				} else {
-    					FAIL(node, "unit directory with back reference");
-    				}
-    				break;
-    		}
-    	}
-    }
-    return 0;
+					} else {
+						FAIL(node, "unit directory with back reference");
+					}
+					break;
+			}
+		}
+	}
+	return 0;
 }
 
 uint16_t make_crc (uint32_t *ptr, int length)
@@ -216,7 +216,7 @@ int set_unit_directory(quadlet_t *buffer, rom1394_directory *dir)
 
 	quadlet = ntohl(*p);
 	length = quadlet >> 16;
-    
+
 	DEBUG(-1, "directory has %d entries\n", length);
 	for (i=0; i < length; i++) {
 		p++;
@@ -334,13 +334,13 @@ int get_unit_size(quadlet_t *buffer)
 	quadlet = ntohl(*p);
 	length = quadlet >> 16;
 	x += length;
-    
+
 	DEBUG(-1, "directory has %d entries\n", length);
 	for (i=0; i < length; i++) {
 		p++;
 		quadlet = ntohl(*p);
 		key = quadlet >> 24;
-   		value = quadlet & 0x00FFFFFF;
+		value = quadlet & 0x00FFFFFF;
 		DEBUG(-1, "key/value: %08x/%08x\n", key, value);
 		
 		switch (key) {

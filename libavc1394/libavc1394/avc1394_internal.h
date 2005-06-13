@@ -14,6 +14,7 @@
 void htonl_block(quadlet_t *buf, int len);
 void ntohl_block(quadlet_t *buf, int len);
 char *decode_response(quadlet_t response);
+char *decode_ctype(quadlet_t response);
 int avc_fcp_handler(raw1394handle_t handle, nodeid_t nodeid, int response,
                     size_t length, unsigned char *data);
 void init_avc_response_handler(raw1394handle_t handle);

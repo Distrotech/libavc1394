@@ -1,3 +1,9 @@
+2005-06-13 Dan Dennedy <dan@dennedy.org>
+	* libavc1394/avc1394_simple.c: bugfix avc1394_send_command_block not
+	  idempotent.
+	* libavc1394/avc1394_simple.[hc]: added decode_ctype and additional debug.
+	* various: indentation cleanup.
+
 2005-05-24 Dan Dennedy <dan@dennedy.org>
 	* avc1394_simple.c, avc1394_internal.c: apply patch from Pieter Palmers to 
 	fix incorrect fcp response length handling and subsequent endian conversion.

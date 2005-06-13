@@ -37,7 +37,6 @@
 
 int avc1394_vcr_is_playing(raw1394handle_t handle, nodeid_t node)
 {
-
 	quadlet_t response = avc1394_transaction(handle, node, STATVCR0
 		| AVC1394_VCR_COMMAND_TRANSPORT_STATE | AVC1394_VCR_OPERAND_TRANSPORT_STATE,
 		AVC1394_RETRY);
@@ -51,7 +50,6 @@ int avc1394_vcr_is_playing(raw1394handle_t handle, nodeid_t node)
 
 int avc1394_vcr_is_recording(raw1394handle_t handle, nodeid_t node)
 {
-
 	quadlet_t response = avc1394_transaction(handle, node, STATVCR0
 		| AVC1394_VCR_COMMAND_TRANSPORT_STATE | AVC1394_VCR_OPERAND_TRANSPORT_STATE,
 		AVC1394_RETRY);
@@ -118,11 +116,9 @@ void avc1394_vcr_rewind(raw1394handle_t handle, nodeid_t node)
 	if (avc1394_vcr_is_playing(handle, node)) {
 		avc1394_send_command(handle, node, CTLVCR0
 			| AVC1394_VCR_COMMAND_PLAY | AVC1394_VCR_OPERAND_PLAY_FASTEST_REVERSE);
-
 	} else {
 		avc1394_send_command(handle, node, CTLVCR0
 			| AVC1394_VCR_COMMAND_WIND | AVC1394_VCR_OPERAND_WIND_REWIND);
-
 	}
 }
 
@@ -130,7 +126,6 @@ void avc1394_vcr_rewind(raw1394handle_t handle, nodeid_t node)
 void avc1394_vcr_pause(raw1394handle_t handle, nodeid_t node)
 {
 	int mode;
-
 	
 	if ((mode = avc1394_vcr_is_recording(handle, node))) {
 		if (mode == AVC1394_VCR_OPERAND_RECORD_PAUSE) {
@@ -228,96 +223,96 @@ quadlet_t avc1394_vcr_status(raw1394handle_t handle, nodeid_t node)
 
 char *avc1394_vcr_decode_status(quadlet_t response)
 {
-    /*quadlet_t resp0 = AVC1394_MASK_RESPONSE_OPERAND(response, 0);
-    quadlet_t resp1 = AVC1394_MASK_RESPONSE_OPERAND(response, 1);*/
-    quadlet_t resp2 = AVC1394_MASK_RESPONSE_OPERAND(response, 2);
-    quadlet_t resp3 = AVC1394_MASK_RESPONSE_OPERAND(response, 3);
-
-    if (response == 0) {
-        return "OK";
-    } else if (resp2 == AVC1394_VCR_RESPONSE_TRANSPORT_STATE_LOAD_MEDIUM) {
-        return("Loading Medium");
-    } else if (resp2 == AVC1394_VCR_RESPONSE_TRANSPORT_STATE_RECORD) {
-        if (resp3 == AVC1394_VCR_OPERAND_RECORD_PAUSE)
-            return("Recording Paused");
-        else
-            return("Recording");
-    } else if (resp2 == AVC1394_VCR_RESPONSE_TRANSPORT_STATE_PLAY) {
-        if (resp3 >= AVC1394_VCR_OPERAND_PLAY_FAST_FORWARD_1
-                && resp3 <= AVC1394_VCR_OPERAND_PLAY_FASTEST_FORWARD) {
-            return("Playing Fast Forward");
-        } else if (resp3 >= AVC1394_VCR_OPERAND_PLAY_FAST_REVERSE_1
-                   && resp3 <= AVC1394_VCR_OPERAND_PLAY_FASTEST_REVERSE) {
-            return("Playing Reverse");
-        } else if (resp3 == AVC1394_VCR_OPERAND_PLAY_FORWARD_PAUSE) {
-            return("Playing Paused");
-        } else {
-            return("Playing");
-        }
-    } else if (resp2 == AVC1394_VCR_RESPONSE_TRANSPORT_STATE_WIND) {
-        if (resp3 == AVC1394_VCR_OPERAND_WIND_HIGH_SPEED_REWIND) {
-            return("Winding backward at incredible speed");
-        } else if (resp3 == AVC1394_VCR_OPERAND_WIND_STOP) {
-            return("Winding stopped");
-        } else if (resp3 == AVC1394_VCR_OPERAND_WIND_REWIND) {
-            return("Winding reverse");
-        } else if (resp3 == AVC1394_VCR_OPERAND_WIND_FAST_FORWARD) {
-            return("Winding forward");
-        } else {
-            return("Winding");
-        }
-    } else {
-        return("Unknown");
-    }
+	/*quadlet_t resp0 = AVC1394_MASK_RESPONSE_OPERAND(response, 0);
+	quadlet_t resp1 = AVC1394_MASK_RESPONSE_OPERAND(response, 1);*/
+	quadlet_t resp2 = AVC1394_MASK_RESPONSE_OPERAND(response, 2);
+	quadlet_t resp3 = AVC1394_MASK_RESPONSE_OPERAND(response, 3);
+	
+	if (response == 0) {
+		return "OK";
+	} else if (resp2 == AVC1394_VCR_RESPONSE_TRANSPORT_STATE_LOAD_MEDIUM) {
+		return("Loading Medium");
+	} else if (resp2 == AVC1394_VCR_RESPONSE_TRANSPORT_STATE_RECORD) {
+		if (resp3 == AVC1394_VCR_OPERAND_RECORD_PAUSE)
+			return("Recording Paused");
+		else
+			return("Recording");
+	} else if (resp2 == AVC1394_VCR_RESPONSE_TRANSPORT_STATE_PLAY) {
+		if (resp3 >= AVC1394_VCR_OPERAND_PLAY_FAST_FORWARD_1
+				&& resp3 <= AVC1394_VCR_OPERAND_PLAY_FASTEST_FORWARD) {
+			return("Playing Fast Forward");
+		} else if (resp3 >= AVC1394_VCR_OPERAND_PLAY_FAST_REVERSE_1
+					&& resp3 <= AVC1394_VCR_OPERAND_PLAY_FASTEST_REVERSE) {
+			return("Playing Reverse");
+		} else if (resp3 == AVC1394_VCR_OPERAND_PLAY_FORWARD_PAUSE) {
+			return("Playing Paused");
+		} else {
+			return("Playing");
+		}
+	} else if (resp2 == AVC1394_VCR_RESPONSE_TRANSPORT_STATE_WIND) {
+		if (resp3 == AVC1394_VCR_OPERAND_WIND_HIGH_SPEED_REWIND) {
+			return("Winding backward at incredible speed");
+		} else if (resp3 == AVC1394_VCR_OPERAND_WIND_STOP) {
+			return("Winding stopped");
+		} else if (resp3 == AVC1394_VCR_OPERAND_WIND_REWIND) {
+			return("Winding reverse");
+		} else if (resp3 == AVC1394_VCR_OPERAND_WIND_FAST_FORWARD) {
+			return("Winding forward");
+		} else {
+			return("Winding");
+		}
+	} else {
+		return("Unknown");
+	}
 }
 
 /* Get the time code on tape in format HH:MM:SS:FF */
 char *
 avc1394_vcr_get_timecode(raw1394handle_t handle, nodeid_t node)
 {
-    quadlet_t  request[2];
-    quadlet_t *response;
-    char      *output = NULL;
-        
-    request[0] = STATVCR0 | AVC1394_VCR_COMMAND_TIME_CODE | 
-        AVC1394_VCR_OPERAND_TIME_CODE_STATUS;
-    request[1] = 0xFFFFFFFF;
-    response = avc1394_transaction_block( handle, node, request, 2, AVC1394_RETRY);
-    if (response == NULL) return NULL;
-
-    output = malloc(12);    
-    // consumer timecode format
-    sprintf(output, "%2.2x:%2.2x:%2.2x:%2.2x",
-        response[1] & 0x000000ff,
-        (response[1] >> 8) & 0x000000ff,
-        (response[1] >> 16) & 0x000000ff,
-        (response[1] >> 24) & 0x000000ff);
-    
-    return output;
+	quadlet_t  request[2];
+	quadlet_t *response;
+	char      *output = NULL;
+		
+	request[0] = STATVCR0 | AVC1394_VCR_COMMAND_TIME_CODE | 
+		AVC1394_VCR_OPERAND_TIME_CODE_STATUS;
+	request[1] = 0xFFFFFFFF;
+	response = avc1394_transaction_block( handle, node, request, 2, AVC1394_RETRY);
+	if (response == NULL) return NULL;
+	
+	output = malloc(12);    
+	// consumer timecode format
+	sprintf(output, "%2.2x:%2.2x:%2.2x:%2.2x",
+		response[1] & 0x000000ff,
+		(response[1] >> 8) & 0x000000ff,
+		(response[1] >> 16) & 0x000000ff,
+		(response[1] >> 24) & 0x000000ff);
+	
+	return output;
 }
 
 /* Get the time code on tape in format HH:MM:SS:FF */
 int
 avc1394_vcr_get_timecode2(raw1394handle_t handle, nodeid_t node, char *output)
 {
-    quadlet_t  request[2];
-    quadlet_t *response;
-        
-    request[0] = STATVCR0 | AVC1394_VCR_COMMAND_TIME_CODE | 
-        AVC1394_VCR_OPERAND_TIME_CODE_STATUS;
-    request[1] = 0xFFFFFFFF;
-    response = avc1394_transaction_block( handle, node, request, 2, AVC1394_RETRY);
-    if (response == NULL) 
+	quadlet_t  request[2];
+	quadlet_t *response;
+		
+	request[0] = STATVCR0 | AVC1394_VCR_COMMAND_TIME_CODE | 
+		AVC1394_VCR_OPERAND_TIME_CODE_STATUS;
+	request[1] = 0xFFFFFFFF;
+	response = avc1394_transaction_block( handle, node, request, 2, AVC1394_RETRY);
+	if (response == NULL) 
 		return -1;
-
-    // consumer timecode format
-    sprintf(output, "%2.2x:%2.2x:%2.2x:%2.2x",
-        response[1] & 0x000000ff,
-        (response[1] >> 8) & 0x000000ff,
-        (response[1] >> 16) & 0x000000ff,
-        (response[1] >> 24) & 0x000000ff);
-    
-    return 0;
+	
+	// consumer timecode format
+	sprintf(output, "%2.2x:%2.2x:%2.2x:%2.2x",
+		response[1] & 0x000000ff,
+		(response[1] >> 8) & 0x000000ff,
+		(response[1] >> 16) & 0x000000ff,
+		(response[1] >> 24) & 0x000000ff);
+	
+	return 0;
 }
 
 
@@ -325,20 +320,20 @@ avc1394_vcr_get_timecode2(raw1394handle_t handle, nodeid_t node, char *output)
 void
 avc1394_vcr_seek_timecode(raw1394handle_t handle, nodeid_t node, char *timecode)
 {
-    quadlet_t  request[2];
+	quadlet_t  request[2];
 	unsigned int hh,mm,ss,ff;
-        
-    request[0] = CTLVCR0 | AVC1394_VCR_COMMAND_TIME_CODE | 
-        AVC1394_VCR_OPERAND_TIME_CODE_CONTROL;
-
-    // consumer timecode format
-    sscanf(timecode, "%2x:%2x:%2x:%2x", &hh, &mm, &ss, &ff);
+		
+	request[0] = CTLVCR0 | AVC1394_VCR_COMMAND_TIME_CODE | 
+		AVC1394_VCR_OPERAND_TIME_CODE_CONTROL;
+	
+	// consumer timecode format
+	sscanf(timecode, "%2x:%2x:%2x:%2x", &hh, &mm, &ss, &ff);
 	request[1] = 
 		((ff & 0x000000ff) << 24) |
 		((ss & 0x000000ff) << 16) |
 		((mm & 0x000000ff) <<  8) |
 		((hh & 0x000000ff) <<  0) ;
 	printf("timecode: %08x\n", request[1]);
-    
-    avc1394_send_command_block( handle, node, request, 2);
+	
+	avc1394_send_command_block( handle, node, request, 2);
 }
