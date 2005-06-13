@@ -62,10 +62,10 @@ int avc1394_send_command(raw1394handle_t handle, nodeid_t node, quadlet_t comman
 int avc1394_send_command_block(raw1394handle_t handle, nodeid_t node,
                            quadlet_t *command, int command_len)
 {
-	quadlet_t cmc[command_len];
+	quadlet_t cmd[command_len];
 	int i;
 	
-	for (i=0; i < command_length; i++) {
+	for (i=0; i < command_len; i++) {
 		cmd[i] = ntohl(command[i]);
 	}
 
