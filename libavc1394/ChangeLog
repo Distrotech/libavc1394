@@ -1,3 +1,7 @@
+libavc1394 ChangeLog
+
+0.5.1 release
+
 2005-06-13 Dan Dennedy <dan@dennedy.org>
 	* libavc1394/avc1394_simple.c: bugfix avc1394_send_command_block not
 	  idempotent.
@@ -7,6 +11,8 @@
 2005-05-24 Dan Dennedy <dan@dennedy.org>
 	* avc1394_simple.c, avc1394_internal.c: apply patch from Pieter Palmers to 
 	fix incorrect fcp response length handling and subsequent endian conversion.
+
+0.5.0 release
 
 2005-02-17  Dan Dennedy <dan@dennedy.org>
 	* added spec and pkg-config support files
