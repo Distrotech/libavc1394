@@ -73,7 +73,7 @@ int avc1394_send_command_block(raw1394handle_t handle, nodeid_t node,
 	fprintf(stderr, "avc1394_send_command_block: ");
 	for (i=0; i < command_len; i++)
 		fprintf(stderr, " 0x%08X", htonl(command[i]));
-	fprintf(stderr, " (%s)\n", decode_ctype(htonl(command[0])));
+	fprintf(stderr, " (%s)\n", decode_ctype(command[0]));
 #endif
 	return cooked1394_write(handle, 0xffc0 | node, FCP_COMMAND_ADDR,
 	                        command_len * sizeof(quadlet_t), cmd);
