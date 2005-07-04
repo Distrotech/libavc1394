@@ -234,6 +234,7 @@ void avc1394_transaction_block_close(raw1394handle_t handle)
 {
 	struct fcp_response *fr = raw1394_get_userdata(handle);
 	if (fr != NULL) free(fr);
+	raw1394_set_userdata(handle, NULL);
 }
 
 
