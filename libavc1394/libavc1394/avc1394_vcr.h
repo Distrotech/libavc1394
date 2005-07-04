@@ -103,7 +103,8 @@ avc1394_vcr_decode_status(quadlet_t response);
 /* This version allocates memory for the string, and 
    the caller is required to free it. */
 char *
-avc1394_vcr_get_timecode(raw1394handle_t handle, nodeid_t node);
+avc1394_vcr_get_timecode(raw1394handle_t handle, nodeid_t node)
+__attribute__ ((deprecated));
 /* This version requires a pre-allocated output string of at least 12 
    characters. */
 int

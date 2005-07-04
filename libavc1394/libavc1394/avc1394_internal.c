@@ -24,8 +24,6 @@
 #include <netinet/in.h>
 #include <string.h>
 
-unsigned char g_fcp_response[MAX_RESPONSE_SIZE];
-unsigned int g_fcp_response_length;
 
 void htonl_block(quadlet_t *buf, int len)
 {
@@ -84,21 +82,27 @@ char *decode_ctype(quadlet_t command)
 int avc_fcp_handler(raw1394handle_t handle, nodeid_t nodeid, int response,
 					size_t length, unsigned char *data)
 {
-	if ( response && length > 3 )
-	{
-		if ( *((quadlet_t*)data) != 0 )
-			g_fcp_response_length = (length + sizeof(quadlet_t) - 1) / sizeof(quadlet_t);
-		else
-			g_fcp_response_length = 0;
-		memcpy(g_fcp_response, data, length);
-	}
+	if (response && length > 3) {
+		struct fcp_response *fr = raw1394_get_userdata(handle);
+		
+		/* if not interim, then shut down fcp handler asap to minimize overlapped fcp transactions */
+		if (AVC1394_MASK_RESPONSE( ntohl( ((quadlet_t*)data)[0] ) ) != AVC1394_RESPONSE_INTERIM)
+			raw1394_stop_fcp_listen(handle);
 
+		if (fr->length == 0) {
+			if ( *((quadlet_t*)data) != 0 )
+				fr->length = (length + sizeof(quadlet_t) - 1) / sizeof(quadlet_t);
+			else
+				fr->length = 0;
+			memcpy(fr->data, data, length);
+		}
+	}
 	return 0;
 }
 
-void init_avc_response_handler(raw1394handle_t handle)
+void init_avc_response_handler(raw1394handle_t handle, struct fcp_response *response)
 {
-	memset(g_fcp_response, 0, MAX_RESPONSE_SIZE);
+	raw1394_set_userdata(handle, response);
 	raw1394_set_fcp_handler(handle, avc_fcp_handler);
 	raw1394_start_fcp_listen(handle);
 }

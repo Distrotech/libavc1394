@@ -394,7 +394,10 @@ avc1394_transaction(raw1394handle_t handle, nodeid_t node,
 
 quadlet_t *
 avc1394_transaction_block(raw1394handle_t handle, nodeid_t node,
-	quadlet_t *buf, int len, int retry);
+	quadlet_t *request, int len, int retry);
+
+void 
+avc1394_transaction_block_close(raw1394handle_t handle);
 
 int 
 avc1394_open_descriptor(raw1394handle_t handle, nodeid_t node,

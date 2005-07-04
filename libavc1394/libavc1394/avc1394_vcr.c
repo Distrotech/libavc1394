@@ -277,17 +277,21 @@ avc1394_vcr_get_timecode(raw1394handle_t handle, nodeid_t node)
 	request[0] = STATVCR0 | AVC1394_VCR_COMMAND_TIME_CODE | 
 		AVC1394_VCR_OPERAND_TIME_CODE_STATUS;
 	request[1] = 0xFFFFFFFF;
-	response = avc1394_transaction_block( handle, node, request, 2, AVC1394_RETRY);
-	if (response == NULL) return NULL;
+	response = avc1394_transaction_block(handle, node, request, 2, AVC1394_RETRY);
+	if (response == NULL || response[1] == 0xffffffff) {
+		avc1394_transaction_block_close(handle);
+		return NULL;
+	}
 	
-	output = malloc(12);    
+	output = malloc(12); // XXX: memory leak!
 	// consumer timecode format
 	sprintf(output, "%2.2x:%2.2x:%2.2x:%2.2x",
 		response[1] & 0x000000ff,
 		(response[1] >> 8) & 0x000000ff,
 		(response[1] >> 16) & 0x000000ff,
 		(response[1] >> 24) & 0x000000ff);
-	
+
+	avc1394_transaction_block_close(handle);
 	return output;
 }
 
@@ -301,10 +305,12 @@ avc1394_vcr_get_timecode2(raw1394handle_t handle, nodeid_t node, char *output)
 	request[0] = STATVCR0 | AVC1394_VCR_COMMAND_TIME_CODE | 
 		AVC1394_VCR_OPERAND_TIME_CODE_STATUS;
 	request[1] = 0xFFFFFFFF;
-	response = avc1394_transaction_block( handle, node, request, 2, AVC1394_RETRY);
-	if (response == NULL) 
+	response = avc1394_transaction_block(handle, node, request, 2, AVC1394_RETRY);
+	if (response == NULL || response[1] == 0xffffffff) {
+		avc1394_transaction_block_close(handle);
 		return -1;
-	
+	}
+
 	// consumer timecode format
 	sprintf(output, "%2.2x:%2.2x:%2.2x:%2.2x",
 		response[1] & 0x000000ff,
@@ -312,6 +318,7 @@ avc1394_vcr_get_timecode2(raw1394handle_t handle, nodeid_t node, char *output)
 		(response[1] >> 16) & 0x000000ff,
 		(response[1] >> 24) & 0x000000ff);
 	
+	avc1394_transaction_block_close(handle);
 	return 0;
 }
 

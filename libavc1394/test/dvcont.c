@@ -230,7 +230,7 @@ int main (int argc, char *argv[])
     		}
 
 		} else if (strcmp( "pluginfo", argv[i]) == 0) {
-			quadlet_t request[2];
+			quadlet_t  request[2];
 			quadlet_t *response;
 		
 			request[0] = AVC1394_CTYPE_STATUS | AVC1394_SUBUNIT_TYPE_TAPE_RECORDER | AVC1394_SUBUNIT_ID_0
@@ -246,6 +246,7 @@ int main (int argc, char *argv[])
 				fprintf(stderr, "pluginfo: 0x%08X 0x%08X\n", response[0], response[1]);
 #endif
 			}
+			avc1394_transaction_block_close(handle);
 		}
 	}
 		
