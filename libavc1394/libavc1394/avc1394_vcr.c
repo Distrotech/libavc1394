@@ -283,13 +283,14 @@ avc1394_vcr_get_timecode(raw1394handle_t handle, nodeid_t node)
 		return NULL;
 	}
 	
-	output = malloc(12); // XXX: memory leak!
-	// consumer timecode format
-	sprintf(output, "%2.2x:%2.2x:%2.2x:%2.2x",
-		response[1] & 0x000000ff,
-		(response[1] >> 8) & 0x000000ff,
-		(response[1] >> 16) & 0x000000ff,
-		(response[1] >> 24) & 0x000000ff);
+	output = malloc(12);
+	if (output)
+		// consumer timecode format
+		sprintf(output, "%2.2x:%2.2x:%2.2x:%2.2x",
+			response[1] & 0x000000ff,
+			(response[1] >> 8) & 0x000000ff,
+			(response[1] >> 16) & 0x000000ff,
+			(response[1] >> 24) & 0x000000ff);
 
 	avc1394_transaction_block_close(handle);
 	return output;
