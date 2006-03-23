@@ -111,11 +111,18 @@ quadlet_t avc1394_transaction(raw1394handle_t handle, nodeid_t node,
 			continue;
 		}
 	
-		if ( poll( &raw1394_poll, 1, AVC1394_POLL_TIMEOUT) > 0 ) {
-			if (raw1394_poll.revents & POLLIN) {
-				raw1394_loop_iterate(handle);
-				response = ntohl(fr.data[0]);
+		// Only poll if the receive handler hasn't been called yet.
+		// This can occur while waiting for command acknowledgement inside of
+		// raw1394_write.
+		if (fr.length==0) {
+			if ( poll( &raw1394_poll, 1, AVC1394_POLL_TIMEOUT) > 0 ) {
+				if (raw1394_poll.revents & POLLIN) {
+					raw1394_loop_iterate(handle);
+					response = ntohl(fr.data[0]);
+				}
 			}
+		} else {
+			response = ntohl(fr.data[0]);
 		}
 		if (response != 0) {
 			while (AVC1394_MASK_RESPONSE(response) == AVC1394_RESPONSE_INTERIM) {
@@ -185,14 +192,21 @@ quadlet_t *avc1394_transaction_block(raw1394handle_t handle, nodeid_t node,
 			continue;
 		}
 	
-		if ( poll( &raw1394_poll, 1, AVC1394_POLL_TIMEOUT) > 0 ) {
-			if (raw1394_poll.revents & POLLIN) {
-				raw1394_loop_iterate(handle);
-				response = fr->data;
-				ntohl_block(response, fr->length);
+		// Only poll if the receive handler hasn't been called yet.
+		// This can occur while waiting for command acknowledgement inside of
+		// raw1394_write.
+		if (fr->length==0) {
+			if ( poll( &raw1394_poll, 1, AVC1394_POLL_TIMEOUT) > 0 ) {
+				if (raw1394_poll.revents & POLLIN) {
+					raw1394_loop_iterate(handle);
+					response = fr->data;
+					ntohl_block(response, fr->length);
+				}
 			}
+		} else {
+			response = fr->data;
+			ntohl_block(response, fr->length);
 		}
-
 		if (response != NULL) {
 			while (AVC1394_MASK_RESPONSE(response[0]) == AVC1394_RESPONSE_INTERIM) {
 #ifdef DEBUG

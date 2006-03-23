@@ -1,5 +1,9 @@
 libavc1394 ChangeLog
 
+2006-03-22 Dan Dennedy <dan@dennedy.org>
+	* avc1394_simple.c: patch from Pieter Palmers to fix intermittent
+	  failures to see the FCP response.
+
 2005-07-02 Dan Dennedy <dan@dennedy.org>
 	* libavc1394/avc1394_internal.[hc], libavc1394/avc1394_simple.[hc],
 	  libavc1394/avc1349_vcr.c, test/dvcont.c: remove global variables used
