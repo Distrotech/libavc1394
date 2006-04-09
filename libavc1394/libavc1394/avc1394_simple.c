@@ -166,19 +166,21 @@ quadlet_t avc1394_transaction(raw1394handle_t handle, nodeid_t node,
  *		node:		the phyisical ID of the node
  *		buf:	 	the FCP request to send
  *		len:		the length of the FCP request
+ *		response_len the length of the response in quadlets
  *		retry:		retry sending the request this many times
  * RETURNS:	the AV/C response if everything went well, NULL in case of an
  * 		error.
  */
-quadlet_t *avc1394_transaction_block(raw1394handle_t handle, nodeid_t node,
-                              quadlet_t *request, int len, int retry)
+quadlet_t *avc1394_transaction_block2(raw1394handle_t handle, nodeid_t node,
+		quadlet_t *request, int len, unsigned int *response_len, int retry)
 {
 	quadlet_t *response;
 	struct pollfd raw1394_poll;
 	raw1394_poll.fd = raw1394_get_fd(handle);
 	raw1394_poll.events = POLLIN;
 	struct fcp_response *fr = NULL;
-	
+
+	*response_len = 0;
 	fr = calloc(1, sizeof(struct fcp_response));
 	if (fr == NULL)
 		return NULL;
@@ -186,6 +188,7 @@ quadlet_t *avc1394_transaction_block(raw1394handle_t handle, nodeid_t node,
 	do {
 		response = NULL;
 		fr->length = 0;
+		*response_len = 0;
 
 		init_avc_response_handler(handle, fr);
 		if (avc1394_send_command_block(handle, node, request, len) < 0) {
@@ -204,11 +207,13 @@ quadlet_t *avc1394_transaction_block(raw1394handle_t handle, nodeid_t node,
 					raw1394_loop_iterate(handle);
 					response = fr->data;
 					ntohl_block(response, fr->length);
+					*response_len = fr->length;
 				}
 			}
 		} else {
 			response = fr->data;
 			ntohl_block(response, fr->length);
+			*response_len = fr->length;
 		}
 		if (response != NULL) {
 			while (AVC1394_MASK_RESPONSE(response[0]) == AVC1394_RESPONSE_INTERIM) {
@@ -217,12 +222,14 @@ quadlet_t *avc1394_transaction_block(raw1394handle_t handle, nodeid_t node,
 #endif
 				response = NULL;
 				fr->length = 0;
+				*response_len = 0;
 
 				if ( poll( &raw1394_poll, 1, AVC1394_POLL_TIMEOUT) > 0 ) {
 					if (raw1394_poll.revents & POLLIN) {
 						raw1394_loop_iterate(handle);
 						response = fr->data;
 						ntohl_block(response, fr->length);
+						*response_len = fr->length;
 					}
 				}
 			}
@@ -248,6 +255,16 @@ quadlet_t *avc1394_transaction_block(raw1394handle_t handle, nodeid_t node,
 	
 	stop_avc_response_handler(handle);
 	return NULL;
+}
+
+/*
+ * kept for backwards compatibility
+ */
+quadlet_t *avc1394_transaction_block(raw1394handle_t handle, nodeid_t node,
+                              quadlet_t *request, int len, int retry)
+{
+	unsigned int response_len;
+	return avc1394_transaction_block2(handle, node, request, len, &response_len, retry);
 }
 
 void avc1394_transaction_block_close(raw1394handle_t handle)

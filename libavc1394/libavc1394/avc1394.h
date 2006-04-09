@@ -393,6 +393,10 @@ avc1394_transaction(raw1394handle_t handle, nodeid_t node,
 	quadlet_t quadlet, int retry);
 
 quadlet_t *
+avc1394_transaction_block2(raw1394handle_t handle, nodeid_t node,
+	quadlet_t *request, int len, unsigned int *response_len, int retry);
+
+quadlet_t *
 avc1394_transaction_block(raw1394handle_t handle, nodeid_t node,
 	quadlet_t *request, int len, int retry);
 

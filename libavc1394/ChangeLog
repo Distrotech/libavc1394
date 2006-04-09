@@ -5,17 +5,22 @@ libavc1394 ChangeLog
 	  address from being returned from avc1394_transaction() and 
 	  avc1394_transaction_block() in the case of an unresolved interim
 	  response.
+	* avc1394.h, avc1394_simple.c: added avc1394_transaction_block2() in order
+	  to return the length of the response without breaking interface
+	  backwards compatibility.
 
 2006-03-22 Dan Dennedy <dan@dennedy.org>
 	* avc1394_simple.c: patch from Pieter Palmers to fix intermittent
 	  failures to see the FCP response.
 
 2005-07-02 Dan Dennedy <dan@dennedy.org>
-	* libavc1394/avc1394_internal.[hc], libavc1394/avc1394_simple.[hc],
+	* libavc1394/avc1394_internal.[hc], libavc1394/avc1394_simple.c,
 	  libavc1394/avc1349_vcr.c, test/dvcont.c: remove global variables used
 	  for FCP/AVC transactions, which helps prevent the host order byte swapped
 	  data from being overwritten; adjust the locations of start/stop FCP in
 	  in order to minimize chance of overlapping responses.
+	* libavc1394/avc1394.h: added avc1394_transaction_close() due to removal
+	  of globals for FCP response.
 	* libavc1394/avc1394_vcr.c: return error when timecode is all 0xffffffff.
 
 0.5.1 release
