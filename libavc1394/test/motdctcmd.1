@@ -1,0 +1,98 @@
+.\" motdctcmd - send commands to a Motorola DCT series settop box
+.\" Copyright (c) 2006 Dan Dennedy
+.\"
+.\" This manual page is free software; you can redistribute it and/or modify
+.\" it under the terms of the GNU General Public License as published by
+.\" the Free Software Foundation; either version 2 of the License, or
+.\" (at your option) any later version.
+.\" 
+.\" This program is distributed in the hope that it will be useful,
+.\" but WITHOUT ANY WARRANTY; without even the implied warranty of
+.\" MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+.\" GNU General Public License for more details.
+.\" 
+.\" You should have received a copy of the GNU General Public License
+.\" along with this program; if not, write to the Free Software
+.\" Foundation, Inc.,59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+.\"
+.\" This manual page was written especially for Debian Linux. It is based
+.\" on dvcont's help output using help2man and manual hacking.
+.\"
+.TH MOTDCTCMD 1 "April 2006"
+.SH NAME
+motdctcmd \- send commands to a Motorola DCT series settop box
+.SH SYNOPSIS
+.B motdctcmd
+\fB[\fI-h\fR\fB]\fR \fB[\fI-v\fR\fB]\fR \fI<channel\fR | \fIcommand>\fR
+.SH DESCRIPTION
+.B motdctcmd
+is a command line tool to send control commands via IEEE1394 to a
+Motorola DCT 6200 or 6400 series digital cable settop box. You can
+specify a channel number of one of the following \fIcommand\fRs:
+.LP
+ok
+ select
+ up
+ down
+ left
+ right
+ menu
+ lock
+ setup
+ guide
+ contents
+ favorite
+ exit
+ num0
+ num1
+ num2
+ num3
+ num4
+ num5
+ num6
+ num7
+ num8
+ num9
+ enter
+ music
+ channelup
+ channeldown
+ last
+ previous
+ info
+ display
+ help
+ pageup
+ pagedown
+ power
+ volumeup
+ volumedown
+ mute
+ play
+ stop
+ pause
+ record
+ save
+ rewind
+ fastforward
+ pauseplay
+ pauserecord
+ dayback
+ depletevolume
+ restorevolume
+.TP
+.I -h
+The option makes
+.B motdctcmd
+output usage information.
+.TP
+.I -v
+The option makes
+.B motdctcmd
+output verbose messages useful for debugging.
+.PP
+.SH AUTHORS
+.B motdctcmd
+was written by Stacey D. Son <mythdev@son.org>, John Woodell 
+<woodie@netpress.com>, and Dan Dennedy <dan@dennedy.org>.
+

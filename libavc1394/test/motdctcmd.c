@@ -62,8 +62,7 @@ struct lookup_table_t
 #define UNKNOWN -1
 struct lookup_table_t lookup_table[] =
     {
-	{ "ok",           0x00 }
-	, { "select",     0x00 },
+	{ "ok",           0x00 }, { "select",     0x00 },
 	{ "up",           0x01 },
 	{ "down",         0x02 },
 	{ "left",         0x03 },
