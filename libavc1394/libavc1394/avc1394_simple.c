@@ -129,6 +129,9 @@ quadlet_t avc1394_transaction(raw1394handle_t handle, nodeid_t node,
 #ifdef DEBUG
 				fprintf(stderr,"INTERIM\n");
 #endif
+				response = 0;
+				fr.length = 0;
+
 				if ( poll( &raw1394_poll, 1, AVC1394_POLL_TIMEOUT) > 0 ) {
 					if (raw1394_poll.revents & POLLIN) {
 						raw1394_loop_iterate(handle);
@@ -212,6 +215,9 @@ quadlet_t *avc1394_transaction_block(raw1394handle_t handle, nodeid_t node,
 #ifdef DEBUG
 				fprintf(stderr,"INTERIM\n");
 #endif
+				response = NULL;
+				fr->length = 0;
+
 				if ( poll( &raw1394_poll, 1, AVC1394_POLL_TIMEOUT) > 0 ) {
 					if (raw1394_poll.revents & POLLIN) {
 						raw1394_loop_iterate(handle);
