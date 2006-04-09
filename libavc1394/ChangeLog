@@ -5,9 +5,11 @@ libavc1394 ChangeLog
 	  address from being returned from avc1394_transaction() and 
 	  avc1394_transaction_block() in the case of an unresolved interim
 	  response.
-	* avc1394.h, avc1394_simple.c: added avc1394_transaction_block2() in order
-	  to return the length of the response without breaking interface
-	  backwards compatibility.
+	* avc1394.h, avc1394_simple.c: added avc1394_transaction_block2() in
+	  order to return the length of the response without breaking
+	  interface backwards compatibility.
+	* test/motdctcmd.c: added utility to send control commands to a Motorola
+	  DCT series settop box.
 
 2006-03-22 Dan Dennedy <dan@dennedy.org>
 	* avc1394_simple.c: patch from Pieter Palmers to fix intermittent
