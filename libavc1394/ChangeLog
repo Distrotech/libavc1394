@@ -1,5 +1,7 @@
 libavc1394 ChangeLog
 
+0.5.2 release
+
 2006-04-08 Dan Dennedy <dan@dennedy.org>
 	* avc1394_simple.c: patch from Pieter Palmers to bugfix bad response
 	  address from being returned from avc1394_transaction() and 

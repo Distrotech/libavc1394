@@ -1,3 +1,10 @@
+
+Version 0.5.2:
+- bugfixes
+- new avc1394_transaction_block2() function that returns the length of the
+  response.
+- new motdctcmd based upon 6200ch and 6200cmd from MythTV developers.
+
 Version 0.5.1:
 - bugfixes
 
