@@ -33,6 +33,8 @@
 #include <string.h>
 #include <unistd.h>
 
+#define version "0.1"
+
 // Motorola DCT-6x00 IDs
 #define MOTDCT_SPEC_ID    0x00005068
 #define MOTDCT_SW_VERSION 0x00010101
@@ -57,98 +59,105 @@ struct lookup_table_t
 {
 	char *string;
 	int value;
+	char *desc;
 };
 
+A
 #define UNKNOWN -1
-struct lookup_table_t lookup_table[] =
-    {
-	{ "ok",           0x00 }, { "select",     0x00 },
-	{ "up",           0x01 },
-	{ "down",         0x02 },
-	{ "left",         0x03 },
-	{ "right",        0x04 },
-	{ "menu",         0x09 },
-	{ "lock",         0x0A }, { "setup",      0x0A },
-	{ "guide",        0x0B }, { "contents",   0x0B },
-	{ "favorite",     0x0C },
-	{ "exit",         0x0D },
-	{ "num0",         0x20 },
-	{ "num1",         0x21 },
-	{ "num2",         0x22 },
-	{ "num3",         0x23 },
-	{ "num4",         0x24 },
-	{ "num5",         0x25 },
-	{ "num6",         0x26 },
-	{ "num7",         0x27 },
-	{ "num8",         0x28 },
-	{ "num9",         0x29 },
-	// { "dot",          0x2A },
-	{ "enter",        0x2B }, { "music",      0x2B },
-	// { "clear",        0x2C },
-	{ "channelup",    0x30 },
-	{ "channeldown",  0x31 },
-	{ "last",         0x32 }, { "previous",   0x32 },
-	// { "sound",        0x33 }, { "language",   0x33 },
-	// { "input",        0x34 },
-	{ "info",         0x35 }, { "display",    0x35 },
-	{ "help",         0x36 },
-	{ "pageup",       0x37 },
-	{ "pagedown",     0x38 },
-	{ "power",        0x40 },
-	{ "volumeup",     0x41 },
-	{ "volumedown",   0x42 },
-	{ "mute",         0x43 },
-	{ "play",         0x44 },
-	{ "stop",         0x45 },
-	{ "pause",        0x46 },
-	{ "record",       0x47 }, { "save",       0x47 },
-	{ "rewind",       0x48 },
-	{ "fastforward",  0x49 },
-	// { "eject",        0x4A },
-	// { "forward",      0x4B },
-	// { "backward",     0x4C },
-	// { "angle",        0x4D },
-	// { "pip",          0x4E }, { "subpicture", 0x4E },
-	{ "pauseplay",    0x61 },
-	{ "pauserecord" , 0x63 },
-	{ "dayback",      0x64 },
+struct lookup_table_t command_table[] = 
+{
+	{ "ok",           0x00, "Select the highlighted item" },
+	{ "select",       0x00, "" },
+	{ "up",           0x01, "Move up in the menu or guide" },
+	{ "down",         0x02, "Move down in the menu or guide" },
+	{ "left",         0x03, "Move left in the menu or guide" },
+	{ "right",        0x04, "Move right in the menu or guide" },
+	{ "menu",         0x09, "Enter or Exit the Main Menu" },
+	{ "lock",         0x0A, "Bring up Parental Control screen" },
+	{ "guide",        0x0B, "Bring up Listings By Time screen" },
+	{ "favorite",     0x0C, "Scan through just your favorite channels" },
+	{ "exit",         0x0D, "Return to live TV from the menu or guide" },
+	{ "num0",         0x20, "" }, { "num1",         0x21, "" },
+	{ "num2",         0x22, "" }, { "num3",         0x23, "" },
+	{ "num4",         0x24, "" }, { "num5",         0x25, "" },
+	{ "num6",         0x26, "" }, { "num7",         0x27, "" },
+	{ "num8",         0x28, "" }, { "num9",         0x29, "" },
+	{ "enter",        0x2B, "Enter the digital Music menu" },
+	{ "music",        0x2B, "" },
+	{ "channelup",    0x30, "Change channel up" },
+	{ "channeldown",  0x31, "Change channel down" },
+	{ "last",         0x32, "Return to the previous menu or channel" },
+	{ "previous",     0x32, "" },
+	{ "info",         0x35, "See a description of the current show" },
+	{ "display",      0x35, "" },
+	{ "help",         0x36, "See helpful information" },
+	{ "pageup",       0x37, "Move up one page in the menu or guide" },
+	{ "pagedown",     0x38, "Move down one page in the menu or guide" },
+	{ "power",        0x40, "Toggle the device on or off" },
+	{ "volumeup",     0x41, "Change volume up" },
+	{ "volumedown",   0x42, "Change volume down" },
+	{ "mute",         0x43, "Toggle sound on or off" },
+	{ "play",         0x44, "Play DVR or On-Demand content" },
+	{ "stop",         0x45, "Stop DVR or On-Demand content" },
+	{ "pause",        0x46, "Pause DVR or On-Demand content" },
+	{ "record",       0x47, "Record content on the DVR" },
+	{ "save",         0x47, "" },
+	{ "rewind",       0x48, "Rewind DVR or On-Demand content" },
+	{ "reverse",      0x48, "" },
+	{ "fastforward",  0x49, "Fast Forward DVR or On-Demand content" },
+	{ "forward",      0x49, "" }, { "ff",           0x49, "" },
+	{ "dayback",      0x64, "" },
 	// dayforward     ?
-	{ "depletevolume",0x65 },
-	{ "restorevolume",0x66 },
-	{ 0, UNKNOWN }
+	{ "soundoff",      0x65, "Turn sound off" },
+	{ "soundon",     0x66, "Turn sound on" },
+	{ 0,           UNKNOWN, "" }
 };
 
-int hex2int(char *input)
+void two_col(char *cmd, char *desc)
 {
-	static char hex_table[] = "0123456789abcdef";
-	signed result = 0;
-	int i;
-	for (i = 0; i < strlen(input); ++i) {
-		char lower = tolower(input[i]);
-		char *ptr = strchr(hex_table, lower);
-		if (ptr) {
-			result = 16 * result + (ptr - hex_table);
-		}
+	if (strlen(desc)) {
+		printf("  %s", cmd);
+		int n;
+	        for (n = 16; n > strlen(cmd); --n) { printf(" "); }
+		printf(" %s\n", desc);
 	}
-	return result;
+}
+
+void status()
+{
+	printf("Unknown\n");
+	exit(1);
+}
+
+void ver()
+{
+	printf("motdctcmd (libavc1394) %s\n\n", version);
+	printf("Motorola DCT (digital cable box) control program\n"
+		"By: Stacey D. Son, John Woodell, and Dan Dennedy\n"
+		"Copyright (C) 2004-2006\n"
+	);
+	exit(1);
 }
 
 void usage()
 {
-	fprintf(stderr, "Usage: motdctcmd [-v] <command>\n\n"
-		"   <command> can be a channel number or a command:\n"
+	printf("Usage: motdctcmd [OPTION] <channel|command>\n"
+		"Send control commands via IEEE1394 (firewire),\n"
+		"to a Motorola DCT (digital cable box).\n\n"
+		"Options:\n"
+		"  -d, --debug      Display debug information\n"
+		//"  -s, --status     Display status of device and exit\n"
+		"  -h, --help       Display this help and exit\n"
+		"  -v, --version    Output version information and exit\n\n"
+		"Channels:\n"
+		"  001 - 999        Tune directly to a specific channel\n\n"
+		"Commands:\n"
 		);
-	int last = 0;
 	int i;
-	for (i = 0; 0 != lookup_table[i].string; ++i) {
-		if (i > 0 && lookup_table[i].value == last) {
-			fprintf(stderr," | %s", lookup_table[i].string);
-		} else {
-			fprintf(stderr,"\n   %s", lookup_table[i].string);
-		}
-		last = lookup_table[i].value;
+	for (i = 0; 0 != command_table[i].string; ++i) {
+		two_col(command_table[i].string, command_table[i].desc);
 	}
-	fprintf(stderr, "\n\n");
+	printf("  num0 - num9      Emulate a number key pressed\n\n");
 	exit(1);
 }
 
@@ -156,17 +165,21 @@ int main (int argc, char *argv[])
 {
 	rom1394_directory dir;
 	int device = UNKNOWN;
-	int verbose = 0;
+	int debug = 0;
 	quadlet_t cmd[2];
 	char *input = NULL;
 	int channel;
 
 	if (argc == 1) {
 		usage();
-	} else if (argc == 2 && argv[1][0] == '-' && (argv[1][1] == 'h' || argv[1][1] == '-')) {
+	} else if (argc > 1 && argv[1][0] == '-' && (argv[1][1] == 'h' || argv[1][2] == 'h')) {
 		usage();
-	} else if (argc == 3 && argv[1][0] == '-' && argv[1][1] == 'v') {
-		verbose = 1;
+	} else if (argc > 1 && argv[1][0] == '-' && (argv[1][1] == 'v' || argv[1][2] == 'v')) {
+		ver();
+	} else if (argc > 1 && argv[1][0] == '-' && (argv[1][1] == 's' || argv[1][2] == 's')) {
+		status();
+	} else if (argc == 3 && argv[1][0] == '-' && argv[1][1] == 'd') {
+		debug = 1;
 		input = argv[2];
 	} else {
 		input = argv[1];
@@ -192,7 +205,7 @@ int main (int argc, char *argv[])
 			continue;
 		}
 
-		if (verbose)
+		if (debug)
 			printf("node %d: vendor_id = 0x%08x model_id = 0x%08x\n",
 			       i, dir.vendor_id, dir.model_id);
 
@@ -219,7 +232,7 @@ int main (int argc, char *argv[])
 		digit[1] = (channel % 100)  / 10;
 		digit[0] = (channel % 1000) / 100;
 		
-		if (verbose)
+		if (debug)
 			printf("AV/C Command: %d%d%d = Op1=0x%08X Op2=0x%08X Op3=0x%08X\n", 
 				digit[0], digit[1], digit[2], 
 				CTL_CMD_CHANNEL | digit[0],
@@ -230,29 +243,24 @@ int main (int argc, char *argv[])
 			cmd[0] = CTL_CMD_CHANNEL | digit[i];
 			cmd[1] = 0x0;
 			avc1394_transaction_block(handle, device, cmd, 2, 1);
- 			usleep(500000); // small delay for button to register
+ 			usleep(100000); // small delay for button to register
 		}
 	}
 	else
 	{
 		unsigned value = UNKNOWN;
-		int pass = hex2int(input + 2);
-		if (strlen(input) == 4 && strncmp(input, "0x", 2) == 0 && pass) {
-			value = pass;
-		} else {
-			int i;
-			for (i = 0; 0 != lookup_table[i].string; ++i) {
-				if (0 == strcmp(input, lookup_table[i].string)) {
-					value = lookup_table[i].value;
-					break;
-				}
+		int i;
+		for (i = 0; 0 != command_table[i].string; ++i) {
+			if (0 == strcmp(input, command_table[i].string)) {
+				value = command_table[i].value;
+				break;
 			}
 		}
 	
 		if (value == UNKNOWN) {
 			fprintf(stderr, "Sorry, that command is unknown.\n");
 		} else {
-			if (verbose) {
+			if (debug) {
 				printf("AV/C Press Command: Op1=0x%08X\n", CTL_CMD_PRESS | value );
 			}
 			cmd[0] = CTL_CMD_PRESS | value;
