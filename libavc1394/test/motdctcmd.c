@@ -62,8 +62,8 @@ struct lookup_table_t
 	char *desc;
 };
 
-A
 #define UNKNOWN -1
+
 struct lookup_table_t command_table[] = 
 {
 	{ "ok",           0x00, "Select the highlighted item" },
