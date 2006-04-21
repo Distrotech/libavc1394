@@ -1,6 +1,6 @@
 libavc1394 ChangeLog
 
-0.5.2 release
+0.5.3 release
 
 2006-04-08 Dan Dennedy <dan@dennedy.org>
 	* avc1394_simple.c: patch from Pieter Palmers to bugfix bad response
@@ -12,6 +12,8 @@ libavc1394 ChangeLog
 	  interface backwards compatibility.
 	* test/motdctcmd.c: added utility to send control commands to a Motorola
 	  DCT series settop box.
+
+0.5.2 unreleased
 
 2006-03-22 Dan Dennedy <dan@dennedy.org>
 	* avc1394_simple.c: patch from Pieter Palmers to fix intermittent
