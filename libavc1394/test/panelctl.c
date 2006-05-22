@@ -1,5 +1,5 @@
 /*
- * motdctcmd - Control a Motorola DCT 6200/6400 series settop box
+ * panelctl - Control a Motorola DCT 6200/6400 series settop box
  *
  * Copyright (C) 2004-2006 by Stacey D. Son <mythdev@son.org>,
  * John Woodell <woodie@netpress.com>, and Dan Dennedy <dan@dennedy.org>
@@ -39,21 +39,17 @@
 #define MOTDCT_SPEC_ID    0x00005068
 #define MOTDCT_SW_VERSION 0x00010101
 
-#define AVC1394_SUBUNIT_TYPE_MOTDCT (9 << 19)  /* uses a reserved subunit type */
-#define AVC1394_MOTDCT_COMMAND 0x000007C00     /* 6200 subunit command */
-#define AVC1394_MOTDCT_OPERAND_PRESS 0x00      /* 6200 subunit command operand */
-#define AVC1394_MOTDCT_OPERAND_RELEASE 0x80    /* 6200 subunit command operand */
 
-#define CTL_CMD_PRESS AVC1394_CTYPE_CONTROL | AVC1394_SUBUNIT_TYPE_MOTDCT | \
-        AVC1394_SUBUNIT_ID_0 | AVC1394_MOTDCT_COMMAND | \
-        AVC1394_MOTDCT_OPERAND_PRESS
+#define CTL_CMD_PRESS AVC1394_CTYPE_CONTROL | AVC1394_SUBUNIT_TYPE_PANEL | \
+        AVC1394_SUBUNIT_ID_0 | AVC1394_PANEL_COMMAND_PASS_THROUGH | \
+        AVC1394_PANEL_OPERAND_PRESS
 
-#define CTL_CMD_RELEASE AVC1394_CTYPE_CONTROL | AVC1394_SUBUNIT_TYPE_MOTDCT | \
-        AVC1394_SUBUNIT_ID_0 | AVC1394_MOTDCT_COMMAND | \
-        AVC1394_MOTDCT_OPERAND_RELEASE
+#define CTL_CMD_RELEASE AVC1394_CTYPE_CONTROL | AVC1394_SUBUNIT_TYPE_PANEL | \
+        AVC1394_SUBUNIT_ID_0 | AVC1394_PANEL_COMMAND_PASS_THROUGH | \
+        AVC1394_PANEL_OPERAND_RELEASE
 
-#define CTL_CMD_CHANNEL AVC1394_CTYPE_CONTROL | AVC1394_SUBUNIT_TYPE_MOTDCT | \
-        AVC1394_SUBUNIT_ID_0 | AVC1394_MOTDCT_COMMAND | 0x20
+#define CTL_CMD_CHANNEL AVC1394_CTYPE_CONTROL | AVC1394_SUBUNIT_TYPE_PANEL | \
+        AVC1394_SUBUNIT_ID_0 | AVC1394_PANEL_COMMAND_PASS_THROUGH | AVC1394_PANEL_OPERATION_0
 
 struct lookup_table_t
 {
@@ -64,53 +60,58 @@ struct lookup_table_t
 
 #define UNKNOWN -1
 
-struct lookup_table_t command_table[] = 
-{
-	{ "ok",           0x00, "Select the highlighted item" },
-	{ "select",       0x00, "" },
-	{ "up",           0x01, "Move up in the menu or guide" },
-	{ "down",         0x02, "Move down in the menu or guide" },
-	{ "left",         0x03, "Move left in the menu or guide" },
-	{ "right",        0x04, "Move right in the menu or guide" },
-	{ "menu",         0x09, "Enter or Exit the Main Menu" },
-	{ "lock",         0x0A, "Bring up Parental Control screen" },
-	{ "guide",        0x0B, "Bring up Listings By Time screen" },
-	{ "favorite",     0x0C, "Scan through just your favorite channels" },
-	{ "exit",         0x0D, "Return to live TV from the menu or guide" },
-	{ "num0",         0x20, "" }, { "num1",         0x21, "" },
-	{ "num2",         0x22, "" }, { "num3",         0x23, "" },
-	{ "num4",         0x24, "" }, { "num5",         0x25, "" },
-	{ "num6",         0x26, "" }, { "num7",         0x27, "" },
-	{ "num8",         0x28, "" }, { "num9",         0x29, "" },
-	{ "enter",        0x2B, "Enter the digital Music menu" },
-	{ "music",        0x2B, "" },
-	{ "channelup",    0x30, "Change channel up" },
-	{ "channeldown",  0x31, "Change channel down" },
-	{ "last",         0x32, "Return to the previous menu or channel" },
-	{ "previous",     0x32, "" },
-	{ "info",         0x35, "See a description of the current show" },
-	{ "display",      0x35, "" },
-	{ "help",         0x36, "See helpful information" },
-	{ "pageup",       0x37, "Move up one page in the menu or guide" },
-	{ "pagedown",     0x38, "Move down one page in the menu or guide" },
-	{ "power",        0x40, "Toggle the device on or off" },
-	{ "volumeup",     0x41, "Change volume up" },
-	{ "volumedown",   0x42, "Change volume down" },
-	{ "mute",         0x43, "Toggle sound on or off" },
-	{ "play",         0x44, "Play DVR or On-Demand content" },
-	{ "stop",         0x45, "Stop DVR or On-Demand content" },
-	{ "pause",        0x46, "Pause DVR or On-Demand content" },
-	{ "record",       0x47, "Record content on the DVR" },
-	{ "save",         0x47, "" },
-	{ "rewind",       0x48, "Rewind DVR or On-Demand content" },
-	{ "reverse",      0x48, "" },
-	{ "fastforward",  0x49, "Fast Forward DVR or On-Demand content" },
-	{ "forward",      0x49, "" }, { "ff",           0x49, "" },
-	{ "dayback",      0x64, "" },
-	// dayforward     ?
-	{ "soundoff",      0x65, "Turn sound off" },
-	{ "soundon",     0x66, "Turn sound on" },
-	{ 0,           UNKNOWN, "" }
+struct lookup_table_t command_table[] = {
+{ "ok",           AVC1394_PANEL_OPERATION_SELECT, "Select the highlighted item" },
+{ "select",       AVC1394_PANEL_OPERATION_SELECT, "" },
+{ "up",           AVC1394_PANEL_OPERATION_UP, "Move up in the menu or guide" },
+{ "down",         AVC1394_PANEL_OPERATION_DOWN, "Move down in the menu or guide" },
+{ "left",         AVC1394_PANEL_OPERATION_LEFT, "Move left in the menu or guide" },
+{ "right",        AVC1394_PANEL_OPERATION_RIGHT, "Move right in the menu or guide" },
+{ "menu",         AVC1394_PANEL_OPERATION_ROOT_MENU, "Enter or Exit the Main Menu" },
+{ "lock",         AVC1394_PANEL_OPERATION_SETUP_MENU, "Bring up Parental Control screen" },
+{ "guide",        AVC1394_PANEL_OPERATION_CONTENTS_MENU, "Bring up Listings By Time screen" },
+{ "favorite",     AVC1394_PANEL_OPERATION_FAVORITE_MENU, "Scan through just your favorite channels" },
+{ "exit",         AVC1394_PANEL_OPERATION_EXIT, "Return to live TV from the menu or guide" },
+{ "num0",         AVC1394_PANEL_OPERATION_0, "" },
+{ "num1",         AVC1394_PANEL_OPERATION_1, "" },
+{ "num2",         AVC1394_PANEL_OPERATION_2, "" },
+{ "num3",         AVC1394_PANEL_OPERATION_3, "" },
+{ "num4",         AVC1394_PANEL_OPERATION_4, "" },
+{ "num5",         AVC1394_PANEL_OPERATION_5, "" },
+{ "num6",         AVC1394_PANEL_OPERATION_6, "" },
+{ "num7",         AVC1394_PANEL_OPERATION_7, "" },
+{ "num8",         AVC1394_PANEL_OPERATION_8, "" },
+{ "num9",         AVC1394_PANEL_OPERATION_9, "" },
+{ "enter",        AVC1394_PANEL_OPERATION_ENTER, "" },
+{ "music",        AVC1394_PANEL_OPERATION_ENTER, "Enter the digital Music menu" },
+{ "channelup",    AVC1394_PANEL_OPERATION_CHANNEL_UP, "Change channel up" },
+{ "channeldown",  AVC1394_PANEL_OPERATION_CHANNEL_DOWN, "Change channel down" },
+{ "last",         AVC1394_PANEL_OPERATION_PREVIOUS_CHANNEL, "Return to the previous menu or channel" },
+{ "previous",     AVC1394_PANEL_OPERATION_PREVIOUS_CHANNEL, "" },
+{ "info",         AVC1394_PANEL_OPERATION_DISPLAY_INFO, "See a description of the current show" },
+{ "display",      AVC1394_PANEL_OPERATION_DISPLAY_INFO, "" },
+{ "help",         AVC1394_PANEL_OPERATION_HELP, "See helpful information" },
+{ "pageup",       AVC1394_PANEL_OPERATION_PAGE_UP, "Move up one page in the menu or guide" },
+{ "pagedown",     AVC1394_PANEL_OPERATION_PAGE_DOWN, "Move down one page in the menu or guide" },
+{ "power",        AVC1394_PANEL_OPERATION_POWER, "Toggle the device on or off" },
+{ "volumeup",     AVC1394_PANEL_OPERATION_VOLUME_UP, "Change volume up" },
+{ "volumedown",   AVC1394_PANEL_OPERATION_VOLUME_DOWN, "Change volume down" },
+{ "mute",         AVC1394_PANEL_OPERATION_MUTE, "Toggle sound on or off" },
+{ "play",         AVC1394_PANEL_OPERATION_PLAY, "Play DVR or On-Demand content" },
+{ "stop",         AVC1394_PANEL_OPERATION_STOP, "Stop DVR or On-Demand content" },
+{ "pause",        AVC1394_PANEL_OPERATION_PAUSE, "Pause DVR or On-Demand content" },
+{ "record",       AVC1394_PANEL_OPERATION_RECORD, "Record content on the DVR" },
+{ "save",         AVC1394_PANEL_OPERATION_RECORD, "" },
+{ "rewind",       AVC1394_PANEL_OPERATION_REWIND, "Rewind DVR or On-Demand content" },
+{ "reverse",      AVC1394_PANEL_OPERATION_REWIND, "" },
+{ "fastforward",  AVC1394_PANEL_OPERATION_FASTFORWARD, "Fast Forward DVR or On-Demand content" },
+{ "forward",      AVC1394_PANEL_OPERATION_FASTFORWARD, "" },
+{ "ff",           AVC1394_PANEL_OPERATION_FASTFORWARD, "" },
+{ "dayback",      0x64, "" },
+// dayforward     ?
+{ "soundoff",      0x65, "Turn sound off" },
+{ "soundon",     0x66, "Turn sound on" },
+{ 0,           UNKNOWN, "" }
 };
 
 void two_col(char *cmd, char *desc)
@@ -131,8 +132,8 @@ void status()
 
 void ver()
 {
-	printf("motdctcmd (libavc1394) %s\n\n", version);
-	printf("Motorola DCT (digital cable box) control program\n"
+	printf("panelctl (libavc1394) %s\n\n", version);
+	printf("AV/C Panel control program\n"
 		"By: Stacey D. Son, John Woodell, and Dan Dennedy\n"
 		"Copyright (C) 2004-2006\n"
 	);
@@ -141,9 +142,9 @@ void ver()
 
 void usage()
 {
-	printf("Usage: motdctcmd [OPTION] <channel|command>\n"
+	printf("Usage: panelctl [OPTION] <channel|command>\n"
 		"Send control commands via IEEE1394 (firewire),\n"
-		"to a Motorola DCT (digital cable box).\n\n"
+		"to an AV/C Panel, e.g. Motorola DCT (digital cable box).\n\n"
 		"Options:\n"
 		"  -d, --debug      Display debug information\n"
 		//"  -s, --status     Display status of device and exit\n"
@@ -217,7 +218,7 @@ int main (int argc, char *argv[])
 	}
 
 	if (device == UNKNOWN) {
-		fprintf(stderr, "Could not find Motorola DCT on the 1394 bus.\n");
+		fprintf(stderr, "Could not find device on the 1394 bus.\n");
 		raw1394_destroy_handle(handle);
 		exit(1);
 	}

@@ -2,6 +2,11 @@ libavc1394 ChangeLog
 
 0.5.3 release
 
+2006-05-21 Dan Dennedy <dan@dennedy.org>
+	* libavc1394/avc1394.h: added constants for Panel subunit indirect mode.
+	* test/panelctl.{c,1}: renamed from motdctcmd since this is a (partial)
+	  implementation of the Panel subunit and use new panel constants.
+
 2006-04-08 Dan Dennedy <dan@dennedy.org>
 	* avc1394_simple.c: patch from Pieter Palmers to bugfix bad response
 	  address from being returned from avc1394_transaction() and 
