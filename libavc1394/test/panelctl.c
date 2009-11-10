@@ -27,18 +27,122 @@
 #include <libraw1394/raw1394.h>
 #include <sys/types.h>
 #include <stdio.h>
+#include <argp.h>
 #include <errno.h>
 #include <stdlib.h>
 #include <ctype.h>
 #include <string.h>
 #include <unistd.h>
 
-#define version "0.1"
-
 // Motorola DCT-6x00 IDs
 #define MOTDCT_SPEC_ID    0x00005068
 #define MOTDCT_SW_VERSION 0x00010101
 
+const char *argp_program_version =
+"panelctl  0.2";
+
+char *input;            /* the argument passed to the program */
+int verbose;              /* The -v flag */
+int debug;                /* -d flag */
+int printcommands;	/* -c flag */
+unsigned ctl_guid;		    /* non-zero if -g flag is specified */
+unsigned ctl_spec_id;
+unsigned ctl_sw_version;
+
+/*
+   OPTIONS.  Field 1 in ARGP.
+   Order of fields: {NAME, KEY, ARG, FLAGS, DOC}.
+*/
+static struct argp_option options[] =
+{
+	{"verbose", 	'v', 0, 0, "Produce verbose output"},
+	{"debug",   	'd', 0, 0, "Debug mode"},
+	{"commands",	'c', 0, 0, "Print command list (requires a dummy argument)"},
+	{"guid",   	'g', "GUID", 0, "Specify GUID for the STB to control"},
+	{"specid",  	's', "SPEC_ID", 0, "Specify spec_id of STB to control"},
+	{"swversion", 	'n', "SW_VERSION", 0, "Specify sofware version of STB"},
+	{0}
+};
+
+
+/*
+   PARSER. Field 2 in ARGP.
+   Order of parameters: KEY, ARG, STATE.
+*/
+static error_t
+parse_opt (int key, char *arg, struct argp_state *state)
+{
+	switch (key)
+		{
+		case 'v':
+			verbose = 1;
+			break;
+		case 'd':
+			debug = 1;
+			break;
+		case 'c' :
+			printcommands = 1;
+			break;
+		case 'g':
+			sscanf (arg, "%x", &ctl_guid);
+			break;
+		case 's':
+			sscanf (arg, "%x", &ctl_spec_id);
+			break;
+		case 'n' :
+			sscanf (arg, "%x", &ctl_sw_version);
+			break;
+		case ARGP_KEY_ARG:
+			if (state->arg_num != 0)
+				{
+				argp_usage(state);
+				}
+			input = arg;
+			break;
+		case ARGP_KEY_END:
+			if (state->arg_num != 1)
+				{
+				argp_usage (state);
+				}
+			break;
+		default:
+			return ARGP_ERR_UNKNOWN;
+		}
+	return 0;
+}
+
+/*
+   ARGS_DOC. Field 3 in ARGP.
+   A description of the non-option command-line arguments
+     that we accept.
+*/
+static char args_doc[] = "<channel|command>";
+
+/*
+  DOC.  Field 4 in ARGP.
+  Program documentation.
+*/
+static char doc[] =
+"AV/C panelctl - change channels on, or issue commands to, a firewire AV device\v\
+This program is mostly useful for a firewire tuner or set-top box with an AV interface. \
+Use it to issue a command (panelctl <command>) or to change channels on the tuner (panelctl <channel>). \
+\nTo get a list of legal commands, use the --commands switch. \
+\n\n\
+By default, panelctl will control the first Motorola STB on the firewire chain. This will only work \
+with some Motorola STBs. To control any other STB, or to control multiple STBs, specify the GUID or both the \
+spec_id and software version for the desired \
+STB. This can be found out by running \"panelctl -v -g 1 1\". Because there won\'t be a STV with GUID of 1, \
+it will run through all possible devices and print the info for each one. Once the GUID, or the spec_id and sw_version of the \
+desired device has been learned, it can be used in following commands, e.g. \"panelctl -g 0x123456 666\". Generally, it will \
+be a better approach to use guid, since this will be unique to each STB. \
+\n\n\
+By: Stacey D. Son, John Woodell, Dan Dennedy, and Jerry Fiddler\n\
+Copyright (C) 2004-2009\n";
+
+/*
+   The ARGP structure itself.
+*/
+static struct argp argp = {options, parse_opt, args_doc, doc};
 
 #define CTL_CMD_PRESS AVC1394_CTYPE_CONTROL | AVC1394_SUBUNIT_TYPE_PANEL | \
         AVC1394_SUBUNIT_ID_0 | AVC1394_PANEL_COMMAND_PASS_THROUGH | \
@@ -130,35 +234,16 @@ void status()
 	exit(1);
 }
 
-void ver()
-{
-	printf("panelctl (libavc1394) %s\n\n", version);
-	printf("AV/C Panel control program\n"
-		"By: Stacey D. Son, John Woodell, and Dan Dennedy\n"
-		"Copyright (C) 2004-2006\n"
-	);
-	exit(1);
-}
 
-void usage()
+void doprintcommands()
 {
-	printf("Usage: panelctl [OPTION] <channel|command>\n"
-		"Send control commands via IEEE1394 (firewire),\n"
-		"to an AV/C Panel, e.g. Motorola DCT (digital cable box).\n\n"
-		"Options:\n"
-		"  -d, --debug      Display debug information\n"
-		//"  -s, --status     Display status of device and exit\n"
-		"  -h, --help       Display this help and exit\n"
-		"  -v, --version    Output version information and exit\n\n"
-		"Channels:\n"
-		"  001 - 999        Tune directly to a specific channel\n\n"
-		"Commands:\n"
+	printf("Panelctl commands:\n"
 		);
 	int i;
 	for (i = 0; 0 != command_table[i].string; ++i) {
 		two_col(command_table[i].string, command_table[i].desc);
 	}
-	printf("  num0 - num9      Emulate a number key pressed\n\n");
+	printf("  num0 - num9      Emulate a number key pressed\n");
 	exit(1);
 }
 
@@ -166,25 +251,32 @@ int main (int argc, char *argv[])
 {
 	rom1394_directory dir;
 	int device = UNKNOWN;
-	int debug = 0;
-	quadlet_t cmd[2];
-	char *input = NULL;
-	int channel;
 
-	if (argc == 1) {
-		usage();
-	} else if (argc > 1 && argv[1][0] == '-' && (argv[1][1] == 'h' || argv[1][2] == 'h')) {
-		usage();
-	} else if (argc > 1 && argv[1][0] == '-' && (argv[1][1] == 'v' || argv[1][2] == 'v')) {
-		ver();
-	} else if (argc > 1 && argv[1][0] == '-' && (argv[1][1] == 's' || argv[1][2] == 's')) {
-		status();
-	} else if (argc == 3 && argv[1][0] == '-' && argv[1][1] == 'd') {
-		debug = 1;
-		input = argv[2];
-	} else {
-		input = argv[1];
-	}
+	quadlet_t cmd[2];
+	int channel;
+	int guid;
+
+
+	/* Set default argument defaults */
+	input = NULL;
+	verbose = 0;
+	ctl_guid = 0;
+	ctl_spec_id = MOTDCT_SPEC_ID;
+	ctl_sw_version =  MOTDCT_SW_VERSION;
+
+	/* Get the switches and argument */
+	argp_parse (&argp, argc, argv, 0, 0, 0);
+
+	if (printcommands) {
+		doprintcommands ();
+		exit (0);
+		}
+
+	if (debug != 0) {
+		/* Print argument values */
+		printf ("verbose = %d.  guid = 0x%x\n", verbose, ctl_guid);
+		printf ("ARG = %s\n", input);
+		}
 
 	raw1394handle_t handle = raw1394_new_handle_on_port(0);
 
@@ -205,13 +297,18 @@ int main (int argc, char *argv[])
 			fprintf(stderr,"error reading config rom directory for node %d\n", i);
 			continue;
 		}
+		guid = rom1394_get_guid(handle, i);
+		if (verbose)
+			printf("node %d: vendor_id=0x%x, model_id=0x%x, spec_id=0x%x, sw_version=0x%x, node_capabilities=0x%x, guid=0x%x.\n",
+			       i, dir.vendor_id, dir.model_id, dir.unit_spec_id, dir.unit_sw_version, dir.node_capabilities, guid);
 
-		if (debug)
-			printf("node %d: vendor_id = 0x%08x model_id = 0x%08x\n",
-			       i, dir.vendor_id, dir.model_id);
+		if (guid == ctl_guid) {
+			device = i;
+			break;
+		}
 
-		if ( dir.unit_spec_id == MOTDCT_SPEC_ID &&
-		        dir.unit_sw_version == MOTDCT_SW_VERSION) {
+		if ( ctl_guid == 0 && dir.unit_spec_id == ctl_spec_id &&
+		        dir.unit_sw_version == ctl_sw_version) {
 			device = i;
 			break;
 		}
@@ -233,6 +330,8 @@ int main (int argc, char *argv[])
 		digit[1] = (channel % 100)  / 10;
 		digit[0] = (channel % 1000) / 100;
 		
+		if (verbose)
+			printf ("Changing to channel %d on node %d.\n", channel, device);
 		if (debug)
 			printf("AV/C Command: %d%d%d = Op1=0x%08X Op2=0x%08X Op3=0x%08X\n", 
 				digit[0], digit[1], digit[2], 
@@ -261,6 +360,8 @@ int main (int argc, char *argv[])
 		if (value == UNKNOWN) {
 			fprintf(stderr, "Sorry, that command is unknown.\n");
 		} else {
+			if (verbose)
+				printf ("Issuing command %s to node %d.\n", input, device);
 			if (debug) {
 				printf("AV/C Press Command: Op1=0x%08X\n", CTL_CMD_PRESS | value );
 			}
