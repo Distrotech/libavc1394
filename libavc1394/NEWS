@@ -1,5 +1,9 @@
 libavc1394 Release Notes
 
+Version 0.5.4:
+The only thing in this release is a new version of panelctl that accepts
+options to make it usable against more models of set-top boxes.
+
 Version 0.5.3:
 - bugfixes
 - new avc1394_transaction_block2() function that returns the length of the

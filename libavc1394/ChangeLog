@@ -1,5 +1,11 @@
 libavc1394 ChangeLog
 
+0.5.4 release
+
+2010-08-02 Dan Dennedy <dan@dennedy.org>
+	* panelctl.[c1]: apply patch from Jerry Fiddler to add options --guid,
+	  --specid, --swversion, and --commands.
+
 0.5.3 release
 
 2006-05-21 Dan Dennedy <dan@dennedy.org>
